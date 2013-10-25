@@ -66,8 +66,12 @@
             return function() {
                 var result, error;
 
+                var t0 = new Date().getTime();
+
                 var leg = {
-                    start: 0,
+                    t0: t0,
+                    queued: 0,
+                    started: 0,
                     name: fn.name
                 };
                 current = [leg];

@@ -1,9 +1,13 @@
 "use strict";
 
 describe("Dials", function() {
+    function now() {
+        return new Date().getTime();
+    }
+
     function work(delay) {
-        var time = new Date().getTime();
-        while (new Date().getTime() - time < delay);
+        var start = now();
+        while (now() - start < delay);
     }
 
     beforeEach(function () {
@@ -27,13 +31,16 @@ describe("Dials", function() {
 
         expect(operation).toBe(null);
 
+        var t0 = now();
         var result = f(2, 3);
 
         expect(result).toBe(5);
 
         expect(operation).toEqual([{
+            t0: t0,
             name: 'add',
-            start: 0,
+            queued: 0,
+            started: 0,
             duration: 0
         }]);
     });
@@ -53,6 +60,7 @@ describe("Dials", function() {
 
         var error = null;
         try {
+            var t0 = now();
             f();
         } catch (e) {
             error = e;
@@ -61,8 +69,10 @@ describe("Dials", function() {
         expect(error).not.toEqual(null);
 
         expect(operation).toEqual([{
+            t0: t0,
             name: 'throwError',
-            start: 0,
+            queued: 0,
+            started: 0,
             duration: 0
         }]);
     });
@@ -70,23 +80,25 @@ describe("Dials", function() {
     it('should record a function call which sets a timeout', function() {
         var operation = null;
         var gotCalled = false;
+        var t0;
 
         Dials.onComplete(function(o) {
             operation = o;
         });
 
+        var f = Dials.define(function thing1() {
+            work(20);
+
+            setTimeout(function thing2() {
+                work(5);
+                gotCalled = true;
+            }, 10);
+        });
+
         runs(function() {
-            var f = Dials.define(function thing1() {
-                work(20);
-
-                setTimeout(function thing2() {
-                    work(5);
-                    gotCalled = true;
-                }, 10);
-            });
-
             expect(operation).toBe(null);
 
+            t0 = now();
             f();
 
             expect(gotCalled).toBe(false);
@@ -101,7 +113,9 @@ describe("Dials", function() {
             expect(gotCalled).toBe(true);
 
             expect(operation).toEqual([{
-                start: 0,
+                t0: t0,
+                queued: 0,
+                started: 0,
                 name: 'thing1',
                 duration: 0
             }, {
@@ -114,6 +128,7 @@ describe("Dials", function() {
 });
 
 // ignore()
+// timing
 // timeout arguments
 // timeout not within op
 // overlapping ops
