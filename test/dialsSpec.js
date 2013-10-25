@@ -41,7 +41,8 @@ describe("Dials", function() {
             name: 'add',
             queued: 0,
             started: 0,
-            duration: 0
+            duration: 0,
+            success: true
         }]);
     });
 
@@ -73,7 +74,8 @@ describe("Dials", function() {
             name: 'throwError',
             queued: 0,
             started: 0,
-            duration: 0
+            duration: 0,
+            success: false
         }]);
     });
 
@@ -119,12 +121,14 @@ describe("Dials", function() {
                 queued: 0,
                 started: 0,
                 name: 'thing1',
-                duration: 25
+                duration: 25,
+                success: true
             }, {
                 queued: 20,
                 started: 30,
                 name: 'thing2',
-                duration: 5
+                duration: 5,
+                success: true
             }]);
         });
     });
@@ -135,4 +139,3 @@ describe("Dials", function() {
 // timeout arguments
 // timeout not within op
 // overlapping ops
-// status of calls (success or fail)

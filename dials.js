@@ -24,8 +24,10 @@
         checkDone();
 
         if (error) {
+            leg.success = false;
             throw error;
         } else {
+            leg.success = true;
             return result;
         }
     }
