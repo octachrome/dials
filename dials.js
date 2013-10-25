@@ -65,6 +65,8 @@
                 current = cur;
                 return invoke(fn, leg);
             }, timeout);
+        } else {
+            plainTimeout(fn, timeout);
         }
     };
 
@@ -87,6 +89,13 @@
 
                 return invoke(fn, leg, arguments);
             }
+        },
+
+        ignore: function(fn) {
+            var cur = current;
+            current = null;
+            fn();
+            current = cur;
         }
     };
 }(this));

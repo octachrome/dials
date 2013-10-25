@@ -201,6 +201,46 @@ describe('Dials', function() {
             }]);
         });
     });
+
+    it('should ignore ignored calls to setTimeout', function() {
+        var wasCalled = false;
+
+        var f = Dials.define(function outer() {
+            Dials.ignore(function ignored() {
+                setTimeout(function inner() {
+                    wasCalled = true;
+                }, 1);
+            });
+        });
+
+        var t0 = now();
+        f();
+
+        expect(operations).toNearlyEqual([[{
+            t0: t0,
+            name: 'outer',
+            queued: 0,
+            started: 0,
+            duration: 0,
+            success: true
+        }]]);
+
+        waitsFor(function() {
+            return wasCalled;
+        }, '<inner> should be called', 100);
+
+        runs(function() {
+            // No change
+            expect(operations).toNearlyEqual([[{
+                t0: t0,
+                name: 'outer',
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: true
+            }]]);
+        });
+    });
 });
 
 // ignore()
