@@ -8,7 +8,7 @@
         return new Date().getTime();
     }
 
-    function invoke(fn, cur, leg, args) {
+    function invoke(thisArg, fn, cur, leg, args) {
         var prev = current;
         current = cur;
 
@@ -17,7 +17,7 @@
 
         var result, error;
         try {
-            result = fn.apply(null, args);
+            result = fn.apply(thisArg, args);
         } catch (e) {
             error = e;
         }
@@ -66,11 +66,12 @@
             current.push(leg);
             var cur = current;
 
+            var args = Array.prototype.slice.call(arguments, 2);
             plainTimeout(function() {
-                return invoke(fn, cur, leg);
+                return invoke(this, fn, cur, leg, args);
             }, timeout);
         } else {
-            plainTimeout(fn, timeout);
+            plainTimeout.apply(this, arguments);
         }
     };
 
@@ -89,7 +90,7 @@
                     queued: 0
                 };
 
-                return invoke(fn, [leg], leg, arguments);
+                return invoke(this, fn, [leg], leg, arguments);
             }
         },
 

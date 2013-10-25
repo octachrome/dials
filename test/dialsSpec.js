@@ -76,15 +76,15 @@ describe('Dials', function() {
     });
 
     it('should record a function call which sets a timeout', function() {
-        var gotCalled = false;
+        var timeoutValue = null;
 
         var f = Dials.define(function thing1() {
             work(20);
 
-            setTimeout(function thing2() {
+            setTimeout(function thing2(value) {
                 work(5);
-                gotCalled = true;
-            }, 10);
+                timeoutValue = value;
+            }, 10, 'test');
 
             work(5);
         });
@@ -94,15 +94,15 @@ describe('Dials', function() {
         var t0 = now();
         f();
 
-        expect(gotCalled).toBe(false);
+        expect(timeoutValue).toBe(null);
         expect(operations).toEqual([]);
 
         waitsFor(function() {
             return operations.length;
-        }, 'Operation should complete', 100);
+        }, 'operation should complete', 100);
 
         runs(function() {
-            expect(gotCalled).toBe(true);
+            expect(timeoutValue).toBe('test');
 
             expect(operations).toNearlyEqual([[{
                 t0: t0,
@@ -140,7 +140,7 @@ describe('Dials', function() {
 
         waitsFor(function() {
             return operations.length == 2;
-        }, 'Two operations should complete', 100);
+        }, 'two operations should complete', 100);
 
         runs(function() {
             // thing2 finishes first, because it has a shorter timeout
@@ -237,7 +237,7 @@ describe('Dials', function() {
 
         waitsFor(function() {
             return operations.length;
-        });
+        }, 'operation should complete', 100);
 
         runs(function() {
             expect(stuff).toEqual(['a', 'b']);
@@ -260,20 +260,31 @@ describe('Dials', function() {
     });
 
     it('should not interfere with timeouts outside an operation', function() {
-        var wasCalled = false;
+        var timeoutValue = null;
         
-        setTimeout(function() {
-            wasCalled = true;
-        }, 1);
+        setTimeout(function(arg) {
+            timeoutValue = arg;
+        }, 1, 'arg');
 
         waitsFor(function() {
-            return wasCalled;
-        });
+            return timeoutValue;
+        }, 'timeout value should be set', 100);
 
         runs(function() {
+            expect(timeoutValue).toEqual('arg');
             expect(operations).toEqual([]);
         });
     });
-});
 
-// timeout arguments
+    it('should preserve the <this> pointer', function() {
+        var obj = {
+            f: Dials.define(function(x) {
+                this.x = x;
+            })
+        };
+
+        obj.f(55);
+
+        expect(obj.x).toBe(55);
+    });
+});
