@@ -108,7 +108,6 @@ describe('Dials', function() {
     it('should record a function call which sets a timeout', function() {
         var operation = null;
         var gotCalled = false;
-        var t0;
 
         Dials.onComplete(function(o) {
             operation = o;
@@ -125,15 +124,13 @@ describe('Dials', function() {
             work(5);
         });
 
-        runs(function() {
-            expect(operation).toBe(null);
+        expect(operation).toBe(null);
 
-            t0 = now();
-            f();
+        var t0 = now();
+        f();
 
-            expect(gotCalled).toBe(false);
-            expect(operation).toBe(null);
-        });
+        expect(gotCalled).toBe(false);
+        expect(operation).toBe(null);
 
         waitsFor(function() {
             return operation != null;
@@ -158,9 +155,69 @@ describe('Dials', function() {
             }]);
         });
     });
+
+    it('should record overlapping operations separately', function() {
+        var operations = [];
+
+        Dials.onComplete(function(op) {
+            operations.push(op);
+        });
+
+        var f1 = Dials.define(function thing1() {
+            setTimeout(function thing1a() {
+            }, 30);
+        });
+
+        var f2 = Dials.define(function thing2() {
+            setTimeout(function thing2a() {
+            }, 10);
+        });
+
+        var t0 = now();
+        f1();
+        f2();
+
+        expect(operations).toEqual([]);
+
+        waitsFor(function() {
+            return operations.length == 2;
+        }, 'Two operations should complete', 100);
+
+        runs(function() {
+            // thing2 finishes first, because it has a shorter timeout
+            expect(operations[0]).toNearlyEqual([{
+                t0: t0,
+                queued: 0,
+                started: 0,
+                name: 'thing2',
+                duration: 0,
+                success: true
+            }, {
+                queued: 0,
+                started: 10,
+                name: 'thing2a',
+                duration: 0,
+                success: true
+            }]);
+
+            expect(operations[1]).toNearlyEqual([{
+                t0: t0,
+                queued: 0,
+                started: 0,
+                name: 'thing1',
+                duration: 0,
+                success: true
+            }, {
+                queued: 0,
+                started: 30,
+                name: 'thing1a',
+                duration: 0,
+                success: true
+            }]);
+        });
+    });
 });
 
 // ignore()
 // timeout arguments
 // timeout not within op
-// overlapping ops

@@ -59,8 +59,10 @@
                 queued: now() - current[0].t0
             };
             current.push(leg);
+            var cur = current;
 
             plainTimeout(function() {
+                current = cur;
                 return invoke(fn, leg);
             }, timeout);
         }
