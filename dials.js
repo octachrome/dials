@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 (function(env) {
     var onComplete = null;

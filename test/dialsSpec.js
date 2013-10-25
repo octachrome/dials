@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-describe("Dials", function() {
+describe('Dials', function() {
     function now() {
         return new Date().getTime();
     }
@@ -11,9 +11,35 @@ describe("Dials", function() {
     }
 
     beforeEach(function () {
+        /**
+         * Given a complex object containing operations, round all the timestamp fields to the <nearest> millis.
+         */
+        function round(o, nearest) {
+            var ret;
+            if (Array.isArray(o)) {
+                ret = [];
+                for (var i = 0; i < o.length; i++) {
+                    ret[i] = round(o[i], nearest);
+                }
+                return ret;
+            } else if (typeof o == 'object') {
+                ret = {};
+                for (var key in o) {
+                    if (key == 't0' || key == 'queued' || key == 'started' || key == 'duration') {
+                        ret[key] = nearest * Math.round(o[key] / nearest);
+                    } else {
+                        ret[key] = round(o[key], nearest);
+                    }
+                }
+                return ret;
+            } else {
+                return o;
+            }
+        }
+
         this.addMatchers({
-            toBeBetween: function toBeBetween(lower, upper) {
-                return this.actual >= lower && this.actual <= upper;
+            toNearlyEqual: function(expected) {
+                return this.env.equals_(round(this.actual, 5), round(expected, 5));
             }
         });
     });
@@ -36,7 +62,7 @@ describe("Dials", function() {
 
         expect(result).toBe(5);
 
-        expect(operation).toEqual([{
+        expect(operation).toNearlyEqual([{
             t0: t0,
             name: 'add',
             queued: 0,
@@ -135,7 +161,6 @@ describe("Dials", function() {
 });
 
 // ignore()
-// acceptable error around timing
 // timeout arguments
 // timeout not within op
 // overlapping ops
