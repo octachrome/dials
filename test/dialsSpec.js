@@ -93,9 +93,9 @@ describe('Dials', function() {
             error = e;
         }
 
-        expect(error).not.toEqual(null);
+        expect(error).not.toBe(null);
 
-        expect(operation).toEqual([{
+        expect(operation).toNearlyEqual([{
             t0: t0,
             name: 'throwError',
             queued: 0,
@@ -142,7 +142,7 @@ describe('Dials', function() {
         runs(function() {
             expect(gotCalled).toBe(true);
 
-            expect(operation).toEqual([{
+            expect(operation).toNearlyEqual([{
                 t0: t0,
                 queued: 0,
                 started: 0,
