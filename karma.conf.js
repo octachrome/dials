@@ -14,20 +14,25 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      '*.js',
-      'test/**/*Spec.js'
+      '**/*.js'
     ],
 
 
     // list of files to exclude
     exclude: [
-      
+      'coverage/**'
     ],
+
+
+    preprocessors: {
+        '*.js': 'coverage',
+        'test/nearlyEquals.js': 'coverage'
+    },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
 
 
     // web server port

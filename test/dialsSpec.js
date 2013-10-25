@@ -19,35 +19,9 @@ describe('Dials', function() {
             operations.push(op);
         });
 
-        /**
-         * Given a complex object containing operations, round all the timestamp fields to the <nearest> millis.
-         */
-        function round(o, nearest) {
-            var ret;
-            if (Array.isArray(o)) {
-                ret = [];
-                for (var i = 0; i < o.length; i++) {
-                    ret[i] = round(o[i], nearest);
-                }
-                return ret;
-            } else if (typeof o == 'object') {
-                ret = {};
-                for (var key in o) {
-                    if (key == 't0' || key == 'queued' || key == 'started' || key == 'duration') {
-                        ret[key] = nearest * Math.round(o[key] / nearest);
-                    } else {
-                        ret[key] = round(o[key], nearest);
-                    }
-                }
-                return ret;
-            } else {
-                return o;
-            }
-        }
-
         this.addMatchers({
-            toNearlyEqual: function(expected) {
-                return this.env.equals_(round(this.actual, 5), round(expected, 5));
+            toNearlyEqual: function(o) {
+                return nearlyEquals.call(this, this.actual, o, 5);
             }
         });
     });
@@ -303,4 +277,3 @@ describe('Dials', function() {
 });
 
 // timeout arguments
-// better error margin on timing
