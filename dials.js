@@ -4,16 +4,23 @@
     var onComplete = null;
     var current = null;
 
+    function now() {
+        return new Date().getTime();
+    }
+
     function invoke(fn, leg, args) {
-        var result, error;
+        var result, error, start, end;
 
         try {
+            start = now();
+            leg.started = start - current[0].t0;
             result = fn.apply(null, args);
         } catch (e) {
             error = e;
         }
+        end = now();
 
-        leg.duration = 0;
+        leg.duration = end - start;
         checkDone();
 
         if (error) {
@@ -46,8 +53,8 @@
     env.setTimeout = function Dials_setTimeout(fn, timeout) {
         if (current) {
             var leg = {
-                queued: 0,
-                name: fn.name
+                name: fn.name,
+                queued: now() - current[0].t0
             };
             current.push(leg);
 
@@ -66,13 +73,11 @@
             return function() {
                 var result, error;
 
-                var t0 = new Date().getTime();
-
                 var leg = {
-                    t0: t0,
+                    t0: now(),
+                    name: fn.name,
                     queued: 0,
-                    started: 0,
-                    name: fn.name
+                    started: 0
                 };
                 current = [leg];
 

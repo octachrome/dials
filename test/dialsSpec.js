@@ -93,6 +93,8 @@ describe("Dials", function() {
                 work(5);
                 gotCalled = true;
             }, 10);
+
+            work(5);
         });
 
         runs(function() {
@@ -117,18 +119,19 @@ describe("Dials", function() {
                 queued: 0,
                 started: 0,
                 name: 'thing1',
-                duration: 0
+                duration: 25
             }, {
-                queued: 0,
+                queued: 20,
+                started: 30,
                 name: 'thing2',
-                duration: 0
+                duration: 5
             }]);
         });
     });
 });
 
 // ignore()
-// timing
+// acceptable error around timing
 // timeout arguments
 // timeout not within op
 // overlapping ops
