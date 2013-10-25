@@ -80,7 +80,7 @@
             onComplete = fn;
         },
 
-        define: function(fn) {
+        track: function(fn) {
             return function() {
                 var result, error;
 
