@@ -8,20 +8,25 @@
         return new Date().getTime();
     }
 
-    function invoke(fn, leg, args) {
-        var result, error, start, end;
+    function invoke(fn, cur, leg, args) {
+        var prev = current;
+        current = cur;
 
+        var start = now();
+        leg.started = start - cur[0].t0;
+
+        var result, error;
         try {
-            start = now();
-            leg.started = start - current[0].t0;
             result = fn.apply(null, args);
         } catch (e) {
             error = e;
         }
-        end = now();
+
+        var end = now();
+        current = prev;
 
         leg.duration = end - start;
-        checkDone();
+        checkDone(cur);
 
         if (error) {
             leg.success = false;
@@ -32,19 +37,19 @@
         }
     }
 
-    function checkDone() {
+    function checkDone(cur) {
         try {
-            if (isOpComplete()) {
-                onComplete && onComplete(current);
+            if (isOpComplete(cur)) {
+                onComplete && onComplete(cur);
             }
         } catch (e) {
             // ignore errors thrown by onComplete
         }
     }
 
-    function isOpComplete() {
-        for (var i = 0; i < current.length; i++) {
-            if (current[i].duration == null) {
+    function isOpComplete(cur) {
+        for (var i = 0; i < cur.length; i++) {
+            if (cur[i].duration == null) {
                 return false;
             }
         }
@@ -62,8 +67,7 @@
             var cur = current;
 
             plainTimeout(function() {
-                current = cur;
-                return invoke(fn, leg);
+                return invoke(fn, cur, leg);
             }, timeout);
         } else {
             plainTimeout(fn, timeout);
@@ -82,12 +86,10 @@
                 var leg = {
                     t0: now(),
                     name: fn.name,
-                    queued: 0,
-                    started: 0
+                    queued: 0
                 };
-                current = [leg];
 
-                return invoke(fn, leg, arguments);
+                return invoke(fn, [leg], leg, arguments);
             }
         },
 

@@ -241,8 +241,66 @@ describe('Dials', function() {
             }]]);
         });
     });
+
+    it('should not ignore calls to setTimeout which follow after ignored calls', function() {
+        var stuff = [];
+
+        var f = Dials.define(function outer() {
+            Dials.ignore(function ignored() {
+                setTimeout(function inner1() {
+                    stuff.push('a');
+                }, 1)
+            });
+            setTimeout(function inner2() {
+                stuff.push('b');
+            }, 10)
+        });
+
+        var t0 = now();
+        f();
+
+        expect(operations).toEqual([]);
+
+        waitsFor(function() {
+            return operations.length;
+        });
+
+        runs(function() {
+            expect(stuff).toEqual(['a', 'b']);
+
+            expect(operations).toNearlyEqual([[{
+                t0: t0,
+                name: 'outer',
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: true
+            }, {
+                name: 'inner2',
+                queued: 0,
+                started: 10,
+                duration: 0,
+                success: true
+            }]]);
+        });
+    });
+
+    it('should not interfere with timeouts outside an operation', function() {
+        var wasCalled = false;
+        
+        setTimeout(function() {
+            wasCalled = true;
+        }, 1);
+
+        waitsFor(function() {
+            return wasCalled;
+        });
+
+        runs(function() {
+            expect(operations).toEqual([]);
+        });
+    });
 });
 
-// ignore()
 // timeout arguments
-// timeout not within op
+// better error margin on timing
