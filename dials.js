@@ -16,16 +16,22 @@
 
     /**
      * Returns the current time, as millis since 1970-01-01.
+     * @return the current time
      */
     function now() {
         return new Date().getTime();
     }
 
     /**
-     * Invokes an asynchronous callback which should considered a continuation of a previously started operation. The
-     * state of the previous operation will be restored, so that other asynchronous operations will also be detected,
-     * and timing data will be recorded when the callback starts/finishes.
+     * Invokes an asynchronous callback which should be considered a continuation of a previously started operation.
+     * The state of the previous operation will be restored, so that other asynchronous operations will also be
+     * detected, and timing data will be recorded when the callback starts/finishes.
      * @param thisArg   the context for the operation
+     * @param fn        the callback to invoke
+     * @param cur       the operation which the callback is part of
+     * @param leg       the leg of the operation associated with this callback invocation
+     * @param args      the arguments which should be passed to the callback
+     * @return the return value of the callback; if the callback throws an exception, this method will re-throw it
      */
     function invoke(thisArg, fn, cur, leg, args) {
         var prev = current;
@@ -59,6 +65,7 @@
 
     /**
      * Check whether the current operation is complete, and if so fires the onComplete listener.
+     * @return true if the current operation is complete
      */
     function checkDone(cur) {
         try {
@@ -72,6 +79,7 @@
 
     /**
      * Returns true if the current operation is complete, i.e., every leg has a non-null duration.
+     * @return true if the current operation is complete
      */
     function isOpComplete(cur) {
         for (var i = 0; i < cur.length; i++) {
@@ -84,7 +92,7 @@
 
     /**
      * Queue an asynchronous function call which should be linked to the current operation. The given function will
-     * be invoked immediately with a single argument: a function which should be used to decorage any callbacks that
+     * be invoked immediately with a single argument: a function which should be used to decorate any callbacks that
      * should be tracked as part of the current operation.
      */
     function wrapCallbacks(fn) {
@@ -136,13 +144,17 @@
     env.Dials = {
         /**
          * Register a listener function which should be fired whenever an operation completes.
+         * @param fn a listener function
          */
         onComplete: function(fn) {
             onComplete = fn;
         },
 
         /**
-         * Decorate a function so that it begins a new operation.
+         * Decorate a function so that it begins a new operation. The decorator preserves 'this' so can be safely used
+         * to decorate methods.
+         * @param fn the function to decorate
+         * @return a decorated function
          */
         tracked: function(fn) {
             return function() {
@@ -160,6 +172,7 @@
         /**
          * Invoke the given function and ignore any asynchronous calls queued by it (they will not be tracked as part
          * of the current operation).
+         * @param fn the function to invoke
          */
         ignore: function(fn) {
             var cur = current;
