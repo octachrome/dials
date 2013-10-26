@@ -115,13 +115,13 @@
             }
         }
 
-        fn(wrap);
+        return fn(wrap);
     }
 
     var plainTimeout = env.setTimeout;
     env.setTimeout = function Dials_setTimeout() {
         var args = Array.prototype.slice.call(arguments, 0);
-        wrapCallbacks(function(wrap) {
+        return wrapCallbacks(function(wrap) {
             // 1st argument is the callback function
             args[0] = wrap(args[0]);
             return plainTimeout.apply(null, args);
@@ -132,7 +132,7 @@
         var plainInitialize = Ajax.Request.prototype.initialize;
         Ajax.Request.prototype.initialize = function Dials_Ajax_Request_initialize(url, options) {
             var thisObj = this;
-            wrapCallbacks(function(wrap) {
+            return wrapCallbacks(function(wrap) {
                 if (options.onSuccess) {
                     options.onSuccess = wrap(options.onSuccess);
                 }

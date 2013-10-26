@@ -77,11 +77,12 @@ describe('Dials', function() {
 
     it('should record a function call which sets a timeout', function() {
         var timeoutValue = null;
+        var timeoutId = null;
 
         var f = Dials.tracked(function thing1() {
             work(20);
 
-            setTimeout(function thing2(value) {
+            timeoutId = setTimeout(function thing2(value) {
                 work(5);
                 timeoutValue = value;
             }, 10, 'test');
@@ -94,6 +95,7 @@ describe('Dials', function() {
         var t0 = now();
         f();
 
+        expect(timeoutId).not.toEqual(null);
         expect(timeoutValue).toBe(null);
         expect(operations).toEqual([]);
 
@@ -288,3 +290,5 @@ describe('Dials', function() {
         expect(obj.x).toBe(55);
     });
 });
+
+// check the return value of setTimeout
