@@ -14,6 +14,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'lib/prototype-1.7.1.0.js',
       '**/*.js'
     ],
 
@@ -25,8 +26,8 @@ module.exports = function(config) {
 
 
     preprocessors: {
-        '*.js': 'coverage',
-        'test/nearlyEquals.js': 'coverage'
+      '*.js': 'coverage',
+      'test/nearlyEquals.js': 'coverage'
     },
 
 
@@ -60,7 +61,7 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ['Chrome'],
+    browsers: ['Chrome_without_security'],
 
 
     // If browser does not capture in given timeout [ms], kill it
@@ -69,6 +70,14 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false
+    singleRun: false,
+
+
+    customLaunchers: {
+      Chrome_without_security: {
+        base: 'Chrome',
+        flags: ['--disable-web-security']
+      }
+    }
   });
 };
