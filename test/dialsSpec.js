@@ -27,7 +27,7 @@ describe('Dials', function() {
     });
 
     it('should record a simple function call', function() {
-        var f = Dials.track(function add(a, b) {
+        var f = Dials.tracked(function add(a, b) {
             return a + b;
         });
 
@@ -49,7 +49,7 @@ describe('Dials', function() {
     });
 
     it('should record a throwing function call', function() {
-        var f = Dials.track(function throwError() {
+        var f = Dials.tracked(function throwError() {
             throw Error('test');
         });
 
@@ -78,7 +78,7 @@ describe('Dials', function() {
     it('should record a function call which sets a timeout', function() {
         var timeoutValue = null;
 
-        var f = Dials.track(function thing1() {
+        var f = Dials.tracked(function thing1() {
             work(20);
 
             setTimeout(function thing2(value) {
@@ -122,12 +122,12 @@ describe('Dials', function() {
     });
 
     it('should record overlapping operations separately', function() {
-        var f1 = Dials.track(function thing1() {
+        var f1 = Dials.tracked(function thing1() {
             setTimeout(function thing1a() {
             }, 30);
         });
 
-        var f2 = Dials.track(function thing2() {
+        var f2 = Dials.tracked(function thing2() {
             setTimeout(function thing2a() {
             }, 10);
         });
@@ -179,7 +179,7 @@ describe('Dials', function() {
     it('should ignore ignored calls to setTimeout', function() {
         var wasCalled = false;
 
-        var f = Dials.track(function outer() {
+        var f = Dials.tracked(function outer() {
             Dials.ignore(function ignored() {
                 setTimeout(function inner() {
                     wasCalled = true;
@@ -219,7 +219,7 @@ describe('Dials', function() {
     it('should not ignore calls to setTimeout which follow after ignored calls', function() {
         var stuff = [];
 
-        var f = Dials.track(function outer() {
+        var f = Dials.tracked(function outer() {
             Dials.ignore(function ignored() {
                 setTimeout(function inner1() {
                     stuff.push('a');
@@ -278,7 +278,7 @@ describe('Dials', function() {
 
     it('should preserve the <this> pointer', function() {
         var obj = {
-            f: Dials.track(function(x) {
+            f: Dials.tracked(function(x) {
                 this.x = x;
             })
         };
@@ -288,5 +288,3 @@ describe('Dials', function() {
         expect(obj.x).toBe(55);
     });
 });
-
-// AJAX calls

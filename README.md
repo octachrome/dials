@@ -3,7 +3,7 @@
 A library which provides basic instrumentation of JavaScript function calls. It records start times, durations and whether the function succeeded or failed. In addition, it detects setTimout calls which were triggered from an instrumented method and tracks them as part of the same operation.
 
     var myObject = {
-        Dials.track(function x() {
+        Dials.tracked(function x() {
             // do something
             setTimeout(function y() {
                 // do something else
@@ -38,7 +38,7 @@ The callback is fired only once `x` and `y` have completed. The parameter takes 
 You can choose to ignore async calls using `Dials.ignore`:
 
     var myObject = {
-        Dials.track(function x() {
+        Dials.tracked(function x() {
             // do something
             Dials.ignore(function() {
                 setTimeout(function y() {
