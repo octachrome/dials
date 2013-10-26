@@ -136,6 +136,9 @@
                 if (options.onSuccess) {
                     options.onSuccess = wrap(options.onSuccess);
                 }
+                if (options.onFailure) {
+                    options.onFailure = wrap(options.onFailure);
+                }
                 return plainInitialize.call(thisObj, url, options);
             });
         };

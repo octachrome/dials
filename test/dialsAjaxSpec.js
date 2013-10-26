@@ -46,11 +46,14 @@ describe('Dials-Ajax', function() {
     it('should record Ajax.Requests within tracked functions', function() {
         var json;
 
-        var f = Dials.tracked(function thing1() {
+        var f = Dials.tracked(function myOp() {
             new Ajax.Request('https://api.github.com/users/octachrome', {
                 method: 'get',
-                onSuccess: function thing2(transport) {
+                onSuccess: function onSuccess(transport) {
                     json = transport.responseJSON;
+                },
+                onFailure: function onFailure() {
+                    // do nothing
                 }
             });
         });
@@ -67,14 +70,62 @@ describe('Dials-Ajax', function() {
 
             expect(operations).toNearlyEqual([[{
                 t0: t0,
-                name: 'thing1',
+                name: 'myOp',
                 queued: 0,
                 started: 0,
                 duration: 0,
                 success: true
             },
             {
-                name: 'thing2',
+                name: 'onSuccess',
+                queued: 0,
+                started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                duration: 0,
+                success: true
+            },
+            {
+                name: '',       // a timeout set by prototype.js internally
+                queued: 0,
+                started: 10,
+                duration: 0,
+                success: true
+            }]]);
+        })
+    });
+
+    it('should record failing Ajax.Requests within tracked functions', function() {
+        var failed;
+
+        var f = Dials.tracked(function myOp() {
+            new Ajax.Request('https://api.github.com/users/axvasfasfh', {
+                method: 'get',
+                onSuccess: function onSuccess() {
+                    // do nothing
+                },
+                onFailure: function onFailure() {
+                    failed = true;
+                }
+            });
+        });
+
+        var t0 = now();
+        f();
+
+        waitsFor(function() {
+            return failed;
+        }, 'Ajax request should have failed', 500);
+
+        runs(function() {
+            expect(operations).toNearlyEqual([[{
+                t0: t0,
+                name: 'myOp',
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: true
+            },
+            {
+                name: 'onFailure',
                 queued: 0,
                 started: '*',   // takes anywhere between 5ms and 300ms to complete the request
                 duration: 0,
