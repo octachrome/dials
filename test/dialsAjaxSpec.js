@@ -68,28 +68,28 @@ describe('Dials-Ajax', function() {
         runs(function() {
             expect(json.login).toBe('octachrome');
 
-            expect(operations).toNearlyEqual([[{
+            expect(operations).toNearlyEqual([{
                 t0: t0,
                 name: 'myOp',
                 queued: 0,
                 started: 0,
                 duration: 0,
-                success: true
-            },
-            {
-                name: 'onSuccess',
-                queued: 0,
-                started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                duration: 0,
-                success: true
-            },
-            {
-                name: '',       // a timeout set by prototype.js internally
-                queued: 0,
-                started: 10,
-                duration: 0,
-                success: true
-            }]]);
+                success: true,
+                calls: [{
+                    name: 'onSuccess',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true
+                },
+                {
+                    name: '',       // a timeout set by prototype.js internally
+                    queued: 0,
+                    started: 10,
+                    duration: 0,
+                    success: true
+                }]
+            }]);
         })
     });
 
@@ -116,29 +116,29 @@ describe('Dials-Ajax', function() {
         }, 'Ajax request should have failed', 500);
 
         runs(function() {
-            expect(operations).toNearlyEqual([[{
+            expect(operations).toNearlyEqual([{
                 t0: t0,
                 name: 'myOp',
                 queued: 0,
                 started: 0,
                 duration: 0,
-                success: true
-            },
-            {
-                name: 'onFailure',
-                queued: 0,
-                started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                duration: 0,
-                success: true
-            },
-            {
-                name: '',       // a timeout set by prototype.js internally
-                queued: 0,
-                started: 10,
-                duration: 0,
-                success: true
-            }]]);
-        })
+                success: true,
+                calls: [{
+                    name: 'onFailure',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true
+                },
+                {
+                    name: '',       // a timeout set by prototype.js internally
+                    queued: 0,
+                    started: 10,
+                    duration: 0,
+                    success: true
+                }]
+            }]);
+        });
     });
 
     it('should record completion of Ajax.Requests within tracked functions', function() {
@@ -161,6 +161,57 @@ describe('Dials-Ajax', function() {
         }, 'Ajax request should have completed', 500);
 
         runs(function() {
+            expect(operations).toNearlyEqual([{
+                t0: t0,
+                name: 'myOp',
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: true,
+                calls: [{
+                    name: 'onComplete',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true
+                },
+                {
+                    name: '',       // a timeout set by prototype.js internally
+                    queued: 0,
+                    started: 10,
+                    duration: 0,
+                    success: true
+                }]
+            }]);
+        })
+    });
+
+    xit('should record completion of Ajax.Requests with both onComplete and onFailure callbacks', function() {
+        var complete;
+        var failed;
+
+        var f = Dials.tracked(function myOp() {
+            new Ajax.Request('https://api.github.com/users/axvasfasfh', {
+                method: 'get',
+                onFailure: function onFailure() {
+                    failed = true;
+                },
+                onComplete: function onComplete() {
+                    complete = true;
+                }
+            });
+        });
+
+        var t0 = now();
+        f();
+
+        waitsFor(function() {
+            return complete;
+        }, 'Ajax request should have completed', 500);
+
+        runs(function() {
+            expect(failed).toBe(true);
+
             expect(operations).toNearlyEqual([[{
                 t0: t0,
                 name: 'myOp',

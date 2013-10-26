@@ -34,4 +34,9 @@ describe('nearlyEquals', function() {
         expect([{t0: 5}]).not.toNearlyEqual([{t0: 11}]);
         expect([{t0: 11}]).not.toNearlyEqual([{t0: 5}]);
     });
+
+    it('should compare timestamps in nested legs with delta', function() {
+        expect(        [ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', duration : 25, success : true, calls : [ { queued : 20, started : 31, name : 'thing2', duration : 5, success : true } ] } ])
+        .toNearlyEqual([ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', duration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ]);
+    });
 });

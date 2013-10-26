@@ -38,14 +38,14 @@ describe('Dials', function() {
 
         expect(result).toBe(5);
 
-        expect(operations).toNearlyEqual([[{
+        expect(operations).toNearlyEqual([{
             t0: t0,
             name: 'add',
             queued: 0,
             started: 0,
             duration: 0,
             success: true
-        }]]);
+        }]);
     });
 
     it('should record a throwing function call', function() {
@@ -65,14 +65,14 @@ describe('Dials', function() {
 
         expect(error).not.toBe(null);
 
-        expect(operations).toNearlyEqual([[{
+        expect(operations).toNearlyEqual([{
             t0: t0,
             name: 'throwError',
             queued: 0,
             started: 0,
             duration: 0,
             success: false
-        }]]);
+        }]);
     });
 
     it('should record a function call which sets a timeout', function() {
@@ -106,20 +106,21 @@ describe('Dials', function() {
         runs(function() {
             expect(timeoutValue).toBe('test');
 
-            expect(operations).toNearlyEqual([[{
+            expect(operations).toNearlyEqual([{
                 t0: t0,
                 queued: 0,
                 started: 0,
                 name: 'thing1',
                 duration: 25,
-                success: true
-            }, {
-                queued: 20,
-                started: 30,
-                name: 'thing2',
-                duration: 5,
-                success: true
-            }]]);
+                success: true,
+                calls: [{
+                    queued: 20,
+                    started: 30,
+                    name: 'thing2',
+                    duration: 5,
+                    success: true
+                }]
+            }]);
         });
     });
 
@@ -146,34 +147,34 @@ describe('Dials', function() {
 
         runs(function() {
             // thing2 finishes first, because it has a shorter timeout
-            expect(operations[0]).toNearlyEqual([{
+            expect(operations).toNearlyEqual([{
                 t0: t0,
                 queued: 0,
                 started: 0,
                 name: 'thing2',
                 duration: 0,
-                success: true
-            }, {
-                queued: 0,
-                started: 10,
-                name: 'thing2a',
-                duration: 0,
-                success: true
-            }]);
-
-            expect(operations[1]).toNearlyEqual([{
+                success: true,
+                calls: [{
+                    queued: 0,
+                    started: 10,
+                    name: 'thing2a',
+                    duration: 0,
+                    success: true
+                }]
+            },{
                 t0: t0,
                 queued: 0,
                 started: 0,
                 name: 'thing1',
                 duration: 0,
-                success: true
-            }, {
-                queued: 0,
-                started: 30,
-                name: 'thing1a',
-                duration: 0,
-                success: true
+                success: true,
+                calls: [{
+                    queued: 0,
+                    started: 30,
+                    name: 'thing1a',
+                    duration: 0,
+                    success: true
+                }]
             }]);
         });
     });
@@ -192,14 +193,14 @@ describe('Dials', function() {
         var t0 = now();
         f();
 
-        expect(operations).toNearlyEqual([[{
+        expect(operations).toNearlyEqual([{
             t0: t0,
             name: 'outer',
             queued: 0,
             started: 0,
             duration: 0,
             success: true
-        }]]);
+        }]);
 
         waitsFor(function() {
             return wasCalled;
@@ -207,14 +208,14 @@ describe('Dials', function() {
 
         runs(function() {
             // No change
-            expect(operations).toNearlyEqual([[{
+            expect(operations).toNearlyEqual([{
                 t0: t0,
                 name: 'outer',
                 queued: 0,
                 started: 0,
                 duration: 0,
                 success: true
-            }]]);
+            }]);
         });
     });
 
@@ -244,20 +245,21 @@ describe('Dials', function() {
         runs(function() {
             expect(stuff).toEqual(['a', 'b']);
 
-            expect(operations).toNearlyEqual([[{
+            expect(operations).toNearlyEqual([{
                 t0: t0,
                 name: 'outer',
                 queued: 0,
                 started: 0,
                 duration: 0,
-                success: true
-            }, {
-                name: 'inner2',
-                queued: 0,
-                started: 10,
-                duration: 0,
-                success: true
-            }]]);
+                success: true,
+                calls: [{
+                    name: 'inner2',
+                    queued: 0,
+                    started: 10,
+                    duration: 0,
+                    success: true
+                }]
+            }]);
         });
     });
 
@@ -290,5 +292,3 @@ describe('Dials', function() {
         expect(obj.x).toBe(55);
     });
 });
-
-// check the return value of setTimeout

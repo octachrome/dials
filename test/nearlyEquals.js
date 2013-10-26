@@ -25,7 +25,7 @@ function nearlyEquals(o, a, delta) {
                 if (diff > delta || diff < -delta) {
                     return false;
                 }
-            } else if (!this.env.equals_(a[key], o[key])) {
+            } else if (!nearlyEquals.call(this, a[key], o[key])) {
                 return false;
             }
         }

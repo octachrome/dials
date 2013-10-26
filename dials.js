@@ -10,9 +10,15 @@
     /**
      * The current operation. This is a state variable which is set whenever an operation becomes active, so that any
      * asynchronous calls which are queued will be linked to the active operation. The variable gets updated whenever
-     * any function associated with an operation begins or ends.
+     * any function associated with an operation begins or ends. It is always set to the root leg of the operation.
      */
-    var current = null;
+    var currentRoot = null;
+
+    /**
+     * Similar to currentRoot but holds the active leg of the current operation. Any newly queued asynchronous calls
+     * will be recorded as children of this leg.
+     */
+    var currentLeg = null;
 
     /**
      * Returns the current time, as millis since 1970-01-01.
@@ -28,17 +34,20 @@
      * detected, and timing data will be recorded when the callback starts/finishes.
      * @param thisArg   the context for the operation
      * @param fn        the callback to invoke
-     * @param cur       the operation which the callback is part of
+     * @param root      the overall operation which the callback is part of
      * @param leg       the leg of the operation associated with this callback invocation
      * @param args      the arguments which should be passed to the callback
      * @return the return value of the callback; if the callback throws an exception, this method will re-throw it
      */
-    function invoke(thisArg, fn, cur, leg, args) {
-        var prev = current;
-        current = cur;
+    function invoke(thisArg, fn, root, leg, args) {
+        var prevRoot = currentRoot;
+        currentRoot = root;
+
+        var prevLeg = currentLeg;
+        currentLeg = leg;
 
         var start = now();
-        leg.started = start - cur[0].t0;
+        leg.started = start - root.t0;
         leg.name = fn.name;
 
         var result, error;
@@ -49,10 +58,11 @@
         }
 
         var end = now();
-        current = prev;
+        currentRoot = prevRoot;
+        currentLeg = prevLeg;
 
         leg.duration = end - start;
-        checkDone(cur);
+        checkDone(root);
 
         if (error) {
             leg.success = false;
@@ -64,13 +74,13 @@
     }
 
     /**
-     * Check whether the current operation is complete, and if so fires the onComplete listener.
-     * @return true if the current operation is complete
+     * Check whether the given operation is complete, and if so fires the onComplete listener.
+     * @return true if the given operation is complete
      */
-    function checkDone(cur) {
+    function checkDone(op) {
         try {
-            if (isOpComplete(cur)) {
-                onComplete && onComplete(cur);
+            if (isLegComplete(op)) {
+                onComplete && onComplete(op);
             }
         } catch (e) {
             // ignore errors thrown by onComplete
@@ -78,13 +88,19 @@
     }
 
     /**
-     * Returns true if the current operation is complete, i.e., every leg has a non-null duration.
-     * @return true if the current operation is complete
+     * Returns true if the given leg is complete, i.e., it and its descendants have non-null duration.
+     * @return true if the current leg is complete
      */
-    function isOpComplete(cur) {
-        for (var i = 0; i < cur.length; i++) {
-            if (cur[i].duration == null) {
-                return false;
+    function isLegComplete(leg) {
+        if (leg.duration == null) {
+            return false;
+        }
+        var calls = leg.calls;
+        if (calls) {
+            for (var i = 0; i < calls.length; i++) {
+                if (!isLegComplete(calls[i])) {
+                    return false;
+                }
             }
         }
         return true;
@@ -96,17 +112,18 @@
      * should be tracked as part of the current operation.
      */
     function wrapCallbacks(fn) {
-        if (current) {
+        if (currentRoot) {
             var leg = {
-                queued: now() - current[0].t0
+                queued: now() - currentRoot.t0
             };
-            current.push(leg);
-            var cur = current;
+            currentLeg.calls = currentLeg.calls || [];
+            currentLeg.calls.push(leg);
+            var root = currentRoot;
 
             var wrap = function wrap(cb) {
                 return function wrapped() {
                     var args = Array.prototype.slice.call(arguments, 0);
-                    return invoke(this, cb, cur, leg, args);
+                    return invoke(this, cb, root, leg, args);
                 };
             }
         } else {
@@ -166,12 +183,12 @@
             return function() {
                 var result, error;
 
-                var leg = {
+                var root = {
                     t0: now(),
                     queued: 0
                 };
 
-                return invoke(this, fn, [leg], leg, arguments);
+                return invoke(this, fn, root, root, arguments);
             }
         },
 
@@ -181,10 +198,13 @@
          * @param fn the function to invoke
          */
         ignore: function(fn) {
-            var cur = current;
-            current = null;
+            var root = currentRoot;
+            var leg = currentLeg;
+            currentRoot = null;
+            currentLeg = null;
             fn();
-            current = cur;
+            currentRoot = root;
+            currentLeg = leg;
         }
     };
 }(this));
