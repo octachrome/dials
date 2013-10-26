@@ -140,4 +140,49 @@ describe('Dials-Ajax', function() {
             }]]);
         })
     });
+
+    it('should record completion of Ajax.Requests within tracked functions', function() {
+        var complete;
+
+        var f = Dials.tracked(function myOp() {
+            new Ajax.Request('https://api.github.com/users/axvasfasfh', {
+                method: 'get',
+                onComplete: function onComplete() {
+                    complete = true;
+                }
+            });
+        });
+
+        var t0 = now();
+        f();
+
+        waitsFor(function() {
+            return complete;
+        }, 'Ajax request should have completed', 500);
+
+        runs(function() {
+            expect(operations).toNearlyEqual([[{
+                t0: t0,
+                name: 'myOp',
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: true
+            },
+            {
+                name: 'onComplete',
+                queued: 0,
+                started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                duration: 0,
+                success: true
+            },
+            {
+                name: '',       // a timeout set by prototype.js internally
+                queued: 0,
+                started: 10,
+                duration: 0,
+                success: true
+            }]]);
+        })
+    });
 });
