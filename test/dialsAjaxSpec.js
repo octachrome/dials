@@ -29,7 +29,7 @@ describe('Dials-Ajax', function() {
     it('should not record Ajax.Requests outside of tracked functions', function() {
         var json;
 
-        new Ajax.Request('https://api.github.com/users/octachrome', {method: 'get', onSuccess: function(transport) {
+        new Ajax.Request('http://thebrown.net/test.json', {method: 'get', onSuccess: function(transport) {
             json = transport.responseJSON;
         }});
 
@@ -38,7 +38,7 @@ describe('Dials-Ajax', function() {
         });
 
         runs(function() {
-            expect(json.login).toBe('octachrome');
+            expect(json.test).toBe(true);
             expect(operations).toEqual([]);
         })
     });
@@ -47,7 +47,7 @@ describe('Dials-Ajax', function() {
         var json;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('https://api.github.com/users/octachrome', {
+            new Ajax.Request('http://thebrown.net/test.json', {
                 method: 'get',
                 onSuccess: function onSuccess(transport) {
                     json = transport.responseJSON;
@@ -66,7 +66,7 @@ describe('Dials-Ajax', function() {
         });
 
         runs(function() {
-            expect(json.login).toBe('octachrome');
+            expect(json.test).toBe(true);
 
             expect(operations).toNearlyEqual([{
                 t0: t0,
@@ -85,7 +85,7 @@ describe('Dials-Ajax', function() {
                 {
                     name: '',       // a timeout set by prototype.js internally
                     queued: 0,
-                    started: 10,
+                    started: '*',
                     duration: 0,
                     success: true
                 }]
@@ -97,7 +97,7 @@ describe('Dials-Ajax', function() {
         var failed;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('https://api.github.com/users/axvasfasfh', {
+            new Ajax.Request('http://thebrown.net/missing.json', {
                 method: 'get',
                 onSuccess: function onSuccess() {
                     // do nothing
@@ -113,7 +113,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return failed;
-        }, 'Ajax request should have failed', 500);
+        }, 'Ajax request should have failed');
 
         runs(function() {
             expect(operations).toNearlyEqual([{
@@ -133,7 +133,7 @@ describe('Dials-Ajax', function() {
                 {
                     name: '',       // a timeout set by prototype.js internally
                     queued: 0,
-                    started: 10,
+                    started: '*',
                     duration: 0,
                     success: true
                 }]
@@ -145,7 +145,7 @@ describe('Dials-Ajax', function() {
         var complete;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('https://api.github.com/users/axvasfasfh', {
+            new Ajax.Request('http://thebrown.net/missing.json', {
                 method: 'get',
                 onComplete: function onComplete() {
                     complete = true;
@@ -158,7 +158,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return complete;
-        }, 'Ajax request should have completed', 500);
+        }, 'Ajax request should have completed');
 
         runs(function() {
             expect(operations).toNearlyEqual([{
@@ -178,21 +178,24 @@ describe('Dials-Ajax', function() {
                 {
                     name: '',       // a timeout set by prototype.js internally
                     queued: 0,
-                    started: 10,
+                    started: '*',
                     duration: 0,
                     success: true
                 }]
             }]);
-        })
+        });
     });
 
-    xit('should record completion of Ajax.Requests with both onComplete and onFailure callbacks', function() {
+    it('should record completion of Ajax.Requests with onComplete, onSuccess and onFailure callbacks', function() {
         var complete;
         var failed;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('https://api.github.com/users/axvasfasfh', {
+            new Ajax.Request('http://thebrown.net/missing.json', {
                 method: 'get',
+                onSuccess: function onSuccess() {
+                    // do nothing
+                },
                 onFailure: function onFailure() {
                     failed = true;
                 },
@@ -207,33 +210,38 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return complete;
-        }, 'Ajax request should have completed', 500);
+        }, 'Ajax request should have completed');
 
         runs(function() {
             expect(failed).toBe(true);
 
-            expect(operations).toNearlyEqual([[{
+            expect(operations).toNearlyEqual([{
                 t0: t0,
                 name: 'myOp',
                 queued: 0,
                 started: 0,
                 duration: 0,
-                success: true
-            },
-            {
-                name: 'onComplete',
-                queued: 0,
-                started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                duration: 0,
-                success: true
-            },
-            {
-                name: '',       // a timeout set by prototype.js internally
-                queued: 0,
-                started: 10,
-                duration: 0,
-                success: true
-            }]]);
-        })
+                success: true,
+                calls: [{
+                    name: 'onFailure',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true
+                },{
+                    name: 'onComplete',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true
+                },{
+                    name: '',       // a timeout set by prototype.js internally
+                    queued: 0,
+                    started: '*',
+                    duration: 0,
+                    success: true
+                }]
+            }]);
+        });
     });
 });

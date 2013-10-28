@@ -8,6 +8,11 @@
     var onComplete = null;
 
     /**
+     * All active operations, which have not yet been flagged as complete.
+     */
+    var activeOps = [];
+
+    /**
      * The current operation. This is a state variable which is set whenever an operation becomes active, so that any
      * asynchronous calls which are queued will be linked to the active operation. The variable gets updated whenever
      * any function associated with an operation begins or ends. It is always set to the root leg of the operation.
@@ -48,7 +53,6 @@
 
         var start = now();
         leg.started = start - root.t0;
-        leg.name = fn.name;
 
         var result, error;
         try {
@@ -79,7 +83,9 @@
      */
     function checkDone(op) {
         try {
-            if (isLegComplete(op)) {
+            var i = activeOps.indexOf(op);
+            if (i >= 0 && isLegComplete(op)) {
+                activeOps.splice(i, 1);
                 onComplete && onComplete(op);
             }
         } catch (e) {
@@ -113,17 +119,50 @@
      */
     function wrapCallbacks(fn) {
         if (currentRoot) {
-            var leg = {
-                queued: now() - currentRoot.t0
-            };
-            currentLeg.calls = currentLeg.calls || [];
-            currentLeg.calls.push(leg);
             var root = currentRoot;
+            var parentLeg = currentLeg;
 
-            var wrap = function wrap(cb) {
+            // The legs for all the sticky callbacks registered with fn
+            var stickies = [];
+
+            // Wraps a callback with the code to re-enter the operation. By default, the first callback that fires
+            // completes the operation (unless the callback registers any more async calls). This is because you often
+            // have an onSuccess and an onFailure callback, only one of which will fire. If the sticky flag is true,
+            // this callback will not complete the operation: it will wait for another callback. This is used on
+            // Ajax.Request's onComplete method, to wait for the final onFailure or onSuccess method.
+            var wrap = function wrap(cb, sticky) {
+                var leg = {
+                    name: cb.name,
+                    queued: now() - root.t0
+                };
+                parentLeg.calls = parentLeg.calls || [];
+                parentLeg.calls.push(leg);
+
+                if (!sticky) {
+                    // Register this callback as one which will should be cleaned up by other non-sticky callbacks
+                    stickies.push(leg);
+                }
+
                 return function wrapped() {
                     var args = Array.prototype.slice.call(arguments, 0);
-                    return invoke(this, cb, root, leg, args);
+                    try {
+                        return invoke(this, cb, root, leg, args);
+                    } finally {
+                        if (!sticky) {
+                            // Non-sticky callbacks remove all other non-sticky callbacks from the calls list.
+                            for (var i = 0; i < stickies.length; i++) {
+                                var toDelete = stickies[i];
+                                if (toDelete != leg) {
+                                    var idx = parentLeg.calls.indexOf(toDelete);
+                                    if (idx >= 0) {
+                                        parentLeg.calls.splice(idx, 1);
+                                    }
+                                }
+                            }
+                            // It's nasty to have to check again; the invoke method already checked once
+                            checkDone(root);
+                        }
+                    }
                 };
             }
         } else {
@@ -157,7 +196,7 @@
                     options.onFailure = wrap(options.onFailure);
                 }
                 if (options.onComplete) {
-                    options.onComplete = wrap(options.onComplete);
+                    options.onComplete = wrap(options.onComplete, true);
                 }
                 return plainInitialize.call(thisObj, url, options);
             });
@@ -185,8 +224,11 @@
 
                 var root = {
                     t0: now(),
+                    name: fn.name,
                     queued: 0
                 };
+
+                activeOps.push(root);
 
                 return invoke(this, fn, root, root, arguments);
             }
