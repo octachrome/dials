@@ -117,7 +117,7 @@
      * be invoked immediately with a single argument: a function which should be used to decorate any callbacks that
      * should be tracked as part of the current operation.
      */
-    function wrapCallbacks(fn) {
+    function fork(fn) {
         if (currentRoot) {
             var root = currentRoot;
             var parentLeg = currentLeg;
@@ -177,7 +177,7 @@
     var plainTimeout = env.setTimeout;
     env.setTimeout = function Dials_setTimeout() {
         var args = Array.prototype.slice.call(arguments, 0);
-        return wrapCallbacks(function(wrap) {
+        return fork(function(wrap) {
             // 1st argument is the callback function
             args[0] = wrap(args[0]);
             return plainTimeout.apply(null, args);
@@ -188,7 +188,7 @@
         var plainInitialize = Ajax.Request.prototype.initialize;
         Ajax.Request.prototype.initialize = function Dials_Ajax_Request_initialize(url, options) {
             var thisObj = this;
-            return wrapCallbacks(function(wrap) {
+            return fork(function(wrap) {
                 if (options.onSuccess) {
                     options.onSuccess = wrap(options.onSuccess);
                 }
@@ -233,6 +233,12 @@
                 return invoke(this, fn, root, root, arguments);
             }
         },
+
+        /**
+         * Invoke the given function, passing in another function which can be used to wrap any callbacks such that
+         * they form part of the current operation, if one is defined.
+         */
+        fork: fork,
 
         /**
          * Invoke the given function and ignore any asynchronous calls queued by it (they will not be tracked as part

@@ -292,4 +292,57 @@ describe('Dials', function() {
 
         expect(obj.x).toBe(55);
     });
+
+    it('should ignore synchronous callbacks outside a defined operation', function() {
+        function asyncCall(x, onSuccess) {
+            Dials.fork(function(wrap) {
+                onSuccess = wrap(onSuccess);
+                onSuccess(x);
+            });
+        }
+
+        var result;
+        asyncCall(5, function() {
+            result = 5;
+        });
+
+        expect(result).toBe(5);
+        expect(operations).toEqual([]);
+    });
+
+    it('should record synchronous callbacks within a defined operation', function() {
+        function asyncCall(x, onSuccess) {
+            Dials.fork(function(wrap) {
+                onSuccess = wrap(onSuccess);
+                onSuccess(x);
+            });
+        }
+
+        var result;
+        var f = Dials.tracked(function op() {
+            asyncCall(6, function onSuccess() {
+                result = 6;
+            });
+        });
+
+        var t0 = now();
+        f();
+
+        expect(result).toBe(6);
+        expect(operations).toNearlyEqual([{
+            t0: t0,
+            name: 'op',
+            queued: 0,
+            started: 0,
+            duration: 0,
+            success: true,
+            calls: [{
+                name: 'onSuccess',
+                queued : 0,
+                started : 0,
+                duration : 0,
+                success : true
+            }],
+        }]);
+    });
 });
