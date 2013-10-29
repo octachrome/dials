@@ -30,7 +30,7 @@ describe('Dials-Ajax', function() {
         var json;
 
         new Ajax.Request('base/test.json', {method: 'get', onSuccess: function(transport) {
-            json = transport.responseJSON;
+            json = transport.responseText;
         }});
 
         waitsFor(function() {
@@ -38,7 +38,7 @@ describe('Dials-Ajax', function() {
         }, 'Ajax request should succeed');
 
         runs(function() {
-            expect(json.test).toBe(true);
+            expect(/{"test":true}/.match(json)).toBe(true);
             expect(operations).toEqual([]);
         })
     });
@@ -50,7 +50,7 @@ describe('Dials-Ajax', function() {
             new Ajax.Request('base/test.json', {
                 method: 'get',
                 onSuccess: function onSuccess(transport) {
-                    json = transport.responseJSON;
+                    json = transport.responseText;
                 },
                 onFailure: function onFailure() {
                     // do nothing
@@ -66,7 +66,7 @@ describe('Dials-Ajax', function() {
         }, 'Ajax request should succeed');
 
         runs(function() {
-            expect(json.test).toBe(true);
+            expect(/{"test":true}/.match(json)).toBe(true);
 
             expect(operations).toNearlyEqual([{
                 t0: t0,
