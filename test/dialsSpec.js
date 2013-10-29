@@ -293,7 +293,7 @@ describe('Dials', function() {
         expect(obj.x).toBe(55);
     });
 
-    it('should ignore synchronous callbacks outside a defined operation', function() {
+    it('should ignore custom synchronous callbacks outside a defined operation', function() {
         function asyncCall(x, onSuccess) {
             Dials.fork(function(wrap) {
                 onSuccess = wrap(onSuccess);
@@ -310,7 +310,7 @@ describe('Dials', function() {
         expect(operations).toEqual([]);
     });
 
-    it('should record synchronous callbacks within a defined operation', function() {
+    it('should record custom synchronous callbacks within a defined operation', function() {
         function asyncCall(x, onSuccess) {
             Dials.fork(function(wrap) {
                 onSuccess = wrap(onSuccess);

@@ -244,4 +244,78 @@ describe('Dials-Ajax', function() {
             }]);
         });
     });
+
+    it('should ignore custom asynchronous callbacks outside a defined operation', function() {
+        function loadScript(url, onSuccess) {
+            Dials.fork(function(wrap) {
+                var script = document.createElement('script');
+                script.src = url;
+                script.onload = wrap(onSuccess);
+                document.body.appendChild(script);
+            });
+        }
+
+        expect(window.test1).not.toBe(true);
+
+        var done;
+        loadScript('base/test-data/test1.js', function onSuccess() {
+            done = true;
+        });
+
+        waitsFor(function() {
+            return done;
+        }, 'Should load script');
+
+        runs(function() {
+            expect(window.test1).toBe(true);
+            expect(operations).toEqual([]);
+        });
+    });
+
+    it('should record custom asynchronous callbacks within defined operation', function() {
+        function loadScript(url, onSuccess) {
+            Dials.fork(function(wrap) {
+                var script = document.createElement('script');
+                script.src = url;
+                script.onload = wrap(onSuccess);
+                document.body.appendChild(script);
+            });
+        }
+
+        expect(window.test2).not.toBe(true);
+
+        var done;
+        var f = Dials.tracked(function someOp() {
+            loadScript('base/test-data/test2.js', function onSuccess() {
+                done = true;
+            });
+        });
+
+        var t0 = now();
+        f();
+
+        waitsFor(function() {
+            return done;
+        }, 'Should load script');
+
+        runs(function() {
+            expect(window.test2).toBe(true);
+
+            expect(operations).toNearlyEqual([{
+                t0: t0,
+                name: 'someOp',
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: true,
+                calls: [{
+                    name: 'onSuccess',
+                    queued : 0,
+                    started : '*',
+                    duration : 0,
+                    success : true
+                }],
+            }]);
+        });
+    });
 });

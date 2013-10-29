@@ -14,6 +14,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      {pattern: 'test-data/*.js', included: false},
       'lib/prototype-1.7.1.0.js',
       '**/*.js',
       {pattern: 'test.json', included: false}
@@ -62,7 +63,7 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ['Chrome', 'Firefox'],
+    browsers: ['Chrome'/*, 'Firefox'*/],
 
 
     // If browser does not capture in given timeout [ms], kill it
