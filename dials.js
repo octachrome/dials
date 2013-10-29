@@ -255,13 +255,17 @@
             currentLeg = leg;
         },
 
+        /**
+         * Get/set the name of the current operation or leg.
+         * @param name if non-null, the new name of the operation
+         * @return the name of the operation
+         */
         name: function(name) {
             if (currentLeg) {
-                if (name) {
+                if (name != null) {
                     currentLeg.name = name;
-                } else {
-                    return currentLeg.name;
                 }
+                return currentLeg.name;
             }
         }
     };
