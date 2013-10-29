@@ -29,13 +29,13 @@ describe('Dials-Ajax', function() {
     it('should not record Ajax.Requests outside of tracked functions', function() {
         var json;
 
-        new Ajax.Request('http://thebrown.net/test.json', {method: 'get', onSuccess: function(transport) {
+        new Ajax.Request('base/test.json', {method: 'get', onSuccess: function(transport) {
             json = transport.responseJSON;
         }});
 
         waitsFor(function() {
             return json;
-        });
+        }, 'Ajax request should succeed');
 
         runs(function() {
             expect(json.test).toBe(true);
@@ -47,7 +47,7 @@ describe('Dials-Ajax', function() {
         var json;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('http://thebrown.net/test.json', {
+            new Ajax.Request('base/test.json', {
                 method: 'get',
                 onSuccess: function onSuccess(transport) {
                     json = transport.responseJSON;
@@ -63,7 +63,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return json;
-        });
+        }, 'Ajax request should succeed');
 
         runs(function() {
             expect(json.test).toBe(true);
@@ -97,7 +97,7 @@ describe('Dials-Ajax', function() {
         var failed;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('http://thebrown.net/missing.json', {
+            new Ajax.Request('base/missing.json', {
                 method: 'get',
                 onSuccess: function onSuccess() {
                     // do nothing
@@ -145,7 +145,7 @@ describe('Dials-Ajax', function() {
         var complete;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('http://thebrown.net/missing.json', {
+            new Ajax.Request('base/missing.json', {
                 method: 'get',
                 onComplete: function onComplete() {
                     complete = true;
@@ -191,7 +191,7 @@ describe('Dials-Ajax', function() {
         var failed;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('http://thebrown.net/missing.json', {
+            new Ajax.Request('base/missing.json', {
                 method: 'get',
                 onSuccess: function onSuccess() {
                     // do nothing

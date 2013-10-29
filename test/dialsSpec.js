@@ -7,7 +7,7 @@ describe('Dials', function() {
 
     function work(delay) {
         var start = now();
-        while (now() - start < delay);
+        while (now() - start <= delay);
     }
 
     var operations;
@@ -21,6 +21,7 @@ describe('Dials', function() {
 
         this.addMatchers({
             toNearlyEqual: function(o) {
+                // 5 is good enough for Chrome; Firefox is sometimes 20ms off
                 return nearlyEquals.call(this, this.actual, o, 5);
             }
         });
