@@ -302,8 +302,8 @@ describe('Dials', function() {
         }
 
         var result;
-        asyncCall(5, function() {
-            result = 5;
+        asyncCall(5, function onSuccess(x) {
+            result = x;
         });
 
         expect(result).toBe(5);
@@ -320,8 +320,8 @@ describe('Dials', function() {
 
         var result;
         var f = Dials.tracked(function op() {
-            asyncCall(6, function onSuccess() {
-                result = 6;
+            asyncCall(6, function onSuccess(x) {
+                result = x;
             });
         });
 
@@ -383,6 +383,27 @@ describe('Dials', function() {
                 success: false
             }],
         }]);
+    });
+
+    it('should pass through the return values of callbacks', function() {
+        function asyncCall(x, onSuccess) {
+            return Dials.fork(function(wrap) {
+                onSuccess = wrap(onSuccess);
+                return onSuccess(x);
+            });
+        }
+
+        var result;
+        var f = Dials.tracked(function op(x) {
+            return asyncCall(x, function onSuccess() {
+                return x * 5;
+            });
+        });
+
+        var t0 = now();
+        var result = f(3);
+
+        expect(result).toBe(15);
     });
 
     it('should get the current operation', function() {
