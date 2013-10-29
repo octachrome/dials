@@ -338,10 +338,49 @@ describe('Dials', function() {
             success: true,
             calls: [{
                 name: 'onSuccess',
-                queued : 0,
-                started : 0,
-                duration : 0,
-                success : true
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: true
+            }],
+        }]);
+    });
+
+    it('should record custom synchronous callbacks which throw', function() {
+        function asyncCall(x, onSuccess) {
+            Dials.fork(function(wrap) {
+                onSuccess = wrap(onSuccess);
+                onSuccess(x);
+            });
+        }
+
+        var result;
+        var f = Dials.tracked(function op() {
+            try {
+                asyncCall(6, function onSuccess() {
+                    throw new Error('boing');
+                });
+            } catch(e) {
+                // ignore
+            }
+        });
+
+        var t0 = now();
+        f();
+
+        expect(operations).toNearlyEqual([{
+            t0: t0,
+            name: 'op',
+            queued: 0,
+            started: 0,
+            duration: 0,
+            success: true,
+            calls: [{
+                name: 'onSuccess',
+                queued: 0,
+                started: 0,
+                duration: 0,
+                success: false
             }],
         }]);
     });
