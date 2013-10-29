@@ -253,6 +253,16 @@
             fn();
             currentRoot = root;
             currentLeg = leg;
+        },
+
+        name: function(name) {
+            if (currentLeg) {
+                if (name) {
+                    currentLeg.name = name;
+                } else {
+                    return currentLeg.name;
+                }
+            }
         }
     };
 }(this));

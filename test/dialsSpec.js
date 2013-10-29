@@ -345,4 +345,33 @@ describe('Dials', function() {
             }],
         }]);
     });
+
+    it('should get the current operation', function() {
+        var f = Dials.tracked(function func() {
+            return Dials.name();
+        });
+
+        var t0 = now();
+        var name = f();
+
+        expect(name).toEqual('func');
+    });
+
+    it('should rename the current operation', function() {
+        var f = Dials.tracked(function func() {
+            Dials.name('my operation');
+        });
+
+        var t0 = now();
+        f();
+
+        expect(operations).toNearlyEqual([{
+            t0: t0,
+            name: 'my operation',
+            queued: 0,
+            started: 0,
+            duration: 0,
+            success: true
+        }]);
+    });
 });
