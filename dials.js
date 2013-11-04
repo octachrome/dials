@@ -27,7 +27,7 @@
 
     /**
      * Returns the current time, as millis since 1970-01-01.
-     * @return the current time
+     * @return {number} the current time
      */
     function now() {
         return new Date().getTime();
@@ -53,6 +53,7 @@
 
         var start = now();
         leg.started = start - root.t0;
+        delete leg.stackTrace;
 
         var result, error;
         try {
@@ -79,7 +80,6 @@
 
     /**
      * Check whether the given operation is complete, and if so fires the onComplete listener.
-     * @return true if the given operation is complete
      */
     function checkDone(op) {
         try {
@@ -95,7 +95,7 @@
 
     /**
      * Returns true if the given leg is complete, i.e., it and its descendants have non-null duration.
-     * @return true if the current leg is complete
+     * @return {boolean} true if the current leg is complete
      */
     function isLegComplete(leg) {
         if (leg.duration == null) {
@@ -133,7 +133,8 @@
             var wrap = function wrap(cb, sticky) {
                 var leg = {
                     name: cb.name,
-                    queued: now() - root.t0
+                    queued: now() - root.t0,
+                    stackTrace: new Error().stack
                 };
                 parentLeg.calls = parentLeg.calls || [];
                 parentLeg.calls.push(leg);
@@ -216,12 +217,10 @@
          * Decorate a function so that it begins a new operation. The decorator preserves 'this' so can be safely used
          * to decorate methods.
          * @param fn the function to decorate
-         * @return a decorated function
+         * @return {function} a decorated function
          */
         tracked: function(fn) {
             return function() {
-                var result, error;
-
                 var root = {
                     t0: now(),
                     name: fn.name,
@@ -258,14 +257,20 @@
         /**
          * Get/set the name of the current operation or leg.
          * @param name if non-null, the new name of the operation
-         * @return the name of the operation
+         * @return {string} the name of the operation
          */
         name: function(name) {
             if (currentLeg) {
                 if (name != null) {
                     currentLeg.name = name;
                 }
-                return currentLeg.name;
+            }
+            return currentLeg.name;
+        },
+
+        logActivity: function() {
+            for (var i = 0; i < activeOps.length; i++) {
+                console.log(JSON.stringify(activeOps[i]));
             }
         }
     };
