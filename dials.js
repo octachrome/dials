@@ -157,10 +157,12 @@
              */
             var wrap = function wrap(cb, cause, sticky) {
                 var leg = {
-                    name: cb.name,
                     queued: now() - root.t0,
                     stackTrace: new Error().stack
                 };
+                if (cb.name) {
+                    leg.name = cb.name;
+                }
                 if (cause) {
                     leg.cause = cause;
                 }
