@@ -150,13 +150,20 @@
              * have an onSuccess and an onFailure callback, only one of which will fire. If the sticky flag is true,
              * this callback will not complete the operation: it will wait for another callback. This is used on
              * Ajax.Request's onComplete method, to wait for the final onFailure or onSuccess method.
+             * @param cb {function} the callback to wrap
+             * @param cause {string} a description of what triggered the callback
+             * @param sticky {boolean} well, it's a bit complicated
+             * @return {function} a wrapped callback
              */
-            var wrap = function wrap(cb, sticky) {
+            var wrap = function wrap(cb, cause, sticky) {
                 var leg = {
                     name: cb.name,
                     queued: now() - root.t0,
                     stackTrace: new Error().stack
                 };
+                if (cause) {
+                    leg.cause = cause;
+                }
                 parentLeg.calls = parentLeg.calls || [];
                 parentLeg.calls.push(leg);
 
@@ -230,7 +237,7 @@
         var args = Array.prototype.slice.call(arguments, 0);
         return fork(function(wrap) {
             // 1st argument is the callback function
-            args[0] = wrap(args[0]);
+            args[0] = wrap(args[0], 'timeout');
             var legId = args[0].legId;
             var timeoutId = plainTimeout.apply(null, args);
             timeoutLegs[timeoutId] = legId;
@@ -260,7 +267,7 @@
                     options.onFailure = wrap(options.onFailure);
                 }
                 if (options.onComplete) {
-                    options.onComplete = wrap(options.onComplete, true);
+                    options.onComplete = wrap(options.onComplete, null, true);
                 }
                 return plainInitialize.call(thisObj, url, options);
             });

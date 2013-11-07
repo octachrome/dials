@@ -83,6 +83,7 @@ describe('Dials-Ajax', function() {
                     success: true
                 },
                 {
+                    cause: 'timeout',
                     name: '',       // a timeout set by prototype.js internally
                     queued: 0,
                     started: '*',
@@ -131,6 +132,7 @@ describe('Dials-Ajax', function() {
                     success: true
                 },
                 {
+                    cause: 'timeout',
                     name: '',       // a timeout set by prototype.js internally
                     queued: 0,
                     started: '*',
@@ -176,6 +178,7 @@ describe('Dials-Ajax', function() {
                     success: true
                 },
                 {
+                    cause: 'timeout',
                     name: '',       // a timeout set by prototype.js internally
                     queued: 0,
                     started: '*',
@@ -235,6 +238,7 @@ describe('Dials-Ajax', function() {
                     duration: 0,
                     success: true
                 },{
+                    cause: 'timeout',
                     name: '',       // a timeout set by prototype.js internally
                     queued: 0,
                     started: '*',

@@ -115,6 +115,7 @@ describe('Dials', function() {
                 duration: 25,
                 success: true,
                 calls: [{
+                    cause: 'timeout',
                     queued: 20,
                     started: 30,
                     name: 'thing2',
@@ -124,6 +125,8 @@ describe('Dials', function() {
             }]);
         });
     });
+
+    // it should record a function call which sets a timeout which throws, but Jasmine doesn't like that
 
     it('should record overlapping operations separately', function() {
         var f1 = Dials.tracked(function thing1() {
@@ -156,6 +159,7 @@ describe('Dials', function() {
                 duration: 0,
                 success: true,
                 calls: [{
+                    cause: 'timeout',
                     queued: 0,
                     started: 10,
                     name: 'thing2a',
@@ -170,6 +174,7 @@ describe('Dials', function() {
                 duration: 0,
                 success: true,
                 calls: [{
+                    cause: 'timeout',
                     queued: 0,
                     started: 30,
                     name: 'thing1a',
@@ -254,6 +259,7 @@ describe('Dials', function() {
                 duration: 0,
                 success: true,
                 calls: [{
+                    cause: 'timeout',
                     name: 'inner2',
                     queued: 0,
                     started: 10,
