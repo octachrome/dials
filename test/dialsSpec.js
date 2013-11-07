@@ -434,4 +434,31 @@ describe('Dials', function() {
             success: true
         }]);
     });
+
+    it('should not wait for a cancelled timeout', function() {
+        var timeoutId = null;
+
+        var f = Dials.tracked(function thing1() {
+            timeoutId = setTimeout(function thing2() {
+                expect(true).toBe(false); // fail
+            }, 10);
+
+            clearTimeout(timeoutId);
+        });
+
+        var t0 = now();
+        f();
+
+        expect(timeoutId).not.toEqual(null);
+
+        expect(operations).toNearlyEqual([{
+            t0: t0,
+            queued: 0,
+            started: 0,
+            name: 'thing1',
+            duration: 0,
+            success: true,
+            calls: []
+        }]);
+    });
 });
