@@ -260,14 +260,15 @@
         Ajax.Request.prototype.initialize = function Dials_Ajax_Request_initialize(url, options) {
             var thisObj = this;
             return fork(function(wrap) {
+                var cause = 'ajax:' + url;
                 if (options.onSuccess) {
-                    options.onSuccess = wrap(options.onSuccess);
+                    options.onSuccess = wrap(options.onSuccess, cause);
                 }
                 if (options.onFailure) {
-                    options.onFailure = wrap(options.onFailure);
+                    options.onFailure = wrap(options.onFailure, cause);
                 }
                 if (options.onComplete) {
-                    options.onComplete = wrap(options.onComplete, null, true);
+                    options.onComplete = wrap(options.onComplete, cause, true);
                 }
                 return plainInitialize.call(thisObj, url, options);
             });
