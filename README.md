@@ -33,6 +33,7 @@ The callback is fired only after both `buttonClicked` and `callback` have comple
         queued: 0,              // always 0 for the initial function
         start: 0,               // always 0 for the initial function
         duration: 12,           // the duration of the instrumented function, not including callbacks
+        totalDuration: 21,      // the duration of the whole operation, until the end of the latest finishing callback
         success: true           // true = returned normally
         calls: [{
             name: 'callback',   // the name of the callback function, if it is a named function
@@ -64,6 +65,7 @@ The above code results in this simple operation:
         queued: 0,
         start: 0,
         duration: 12,
+        totalDuration: 12,
         success: true
     };
 

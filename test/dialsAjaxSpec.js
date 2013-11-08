@@ -74,6 +74,7 @@ describe('Dials-Ajax', function() {
                 queued: 0,
                 started: 0,
                 duration: 0,
+                totalDuration: '*',
                 success: true,
                 calls: [{
                     cause: 'ajax:base/test.json',
@@ -123,6 +124,7 @@ describe('Dials-Ajax', function() {
                 queued: 0,
                 started: 0,
                 duration: 0,
+                totalDuration: '*',
                 success: true,
                 calls: [{
                     cause: 'ajax:base/missing.json',
@@ -169,6 +171,7 @@ describe('Dials-Ajax', function() {
                 queued: 0,
                 started: 0,
                 duration: 0,
+                totalDuration: '*',
                 success: true,
                 calls: [{
                     cause: 'ajax:base/missing.json',
@@ -224,6 +227,7 @@ describe('Dials-Ajax', function() {
                 queued: 0,
                 started: 0,
                 duration: 0,
+                totalDuration: '*',
                 success: true,
                 calls: [{
                     cause: 'ajax:base/missing.json',
@@ -312,6 +316,7 @@ describe('Dials-Ajax', function() {
                 queued: 0,
                 started: 0,
                 duration: 0,
+                totalDuration: '*',
                 success: true,
                 calls: [{
                     name: 'onSuccess',

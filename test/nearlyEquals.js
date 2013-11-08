@@ -20,7 +20,8 @@ function nearlyEquals(o, a, delta) {
         for (var key in o) {
             if (!(key in a)) {
                 return false;
-            } else if (key == 't0' || key == 'queued' || key == 'started' || key == 'duration') {
+            } else if (key == 't0' || key == 'queued' || key == 'started' || key == 'duration'
+                || key == 'totalDuration') {
                 var diff = o[key] - a[key];
                 if (diff > delta || diff < -delta) {
                     return false;

@@ -45,6 +45,7 @@ describe('Dials', function() {
             queued: 0,
             started: 0,
             duration: 0,
+            totalDuration: 0,
             success: true
         }]);
     });
@@ -72,6 +73,7 @@ describe('Dials', function() {
             queued: 0,
             started: 0,
             duration: 0,
+            totalDuration: 0,
             success: false
         }]);
     });
@@ -113,6 +115,7 @@ describe('Dials', function() {
                 started: 0,
                 name: 'thing1',
                 duration: 25,
+                totalDuration: 35,
                 success: true,
                 calls: [{
                     cause: 'timeout',
@@ -157,6 +160,7 @@ describe('Dials', function() {
                 started: 0,
                 name: 'thing2',
                 duration: 0,
+                totalDuration: 10,
                 success: true,
                 calls: [{
                     cause: 'timeout',
@@ -172,6 +176,7 @@ describe('Dials', function() {
                 started: 0,
                 name: 'thing1',
                 duration: 0,
+                totalDuration: 30,
                 success: true,
                 calls: [{
                     cause: 'timeout',
@@ -205,6 +210,7 @@ describe('Dials', function() {
             queued: 0,
             started: 0,
             duration: 0,
+            totalDuration: 0,
             success: true
         }]);
 
@@ -220,6 +226,7 @@ describe('Dials', function() {
                 queued: 0,
                 started: 0,
                 duration: 0,
+                totalDuration: 0,
                 success: true
             }]);
         });
@@ -257,6 +264,7 @@ describe('Dials', function() {
                 queued: 0,
                 started: 0,
                 duration: 0,
+                totalDuration: 10,
                 success: true,
                 calls: [{
                     cause: 'timeout',
@@ -341,6 +349,7 @@ describe('Dials', function() {
             queued: 0,
             started: 0,
             duration: 0,
+            totalDuration: 0,
             success: true,
             calls: [{
                 name: 'onSuccess',
@@ -380,6 +389,7 @@ describe('Dials', function() {
             queued: 0,
             started: 0,
             duration: 0,
+            totalDuration: 0,
             success: true,
             calls: [{
                 name: 'onSuccess',
@@ -437,6 +447,7 @@ describe('Dials', function() {
             queued: 0,
             started: 0,
             duration: 0,
+            totalDuration: 0,
             success: true
         }]);
     });
@@ -463,6 +474,7 @@ describe('Dials', function() {
             started: 0,
             name: 'thing1',
             duration: 0,
+            totalDuration: 0,
             success: true,
             calls: []
         }]);

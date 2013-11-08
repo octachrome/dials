@@ -36,7 +36,7 @@ describe('nearlyEquals', function() {
     });
 
     it('should compare timestamps in nested legs with delta', function() {
-        expect(        [ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', duration : 25, success : true, calls : [ { queued : 20, started : 31, name : 'thing2', duration : 5, success : true } ] } ])
-        .toNearlyEqual([ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', duration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ]);
+        expect(        [ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 26, success : true, calls : [ { queued : 21, started : 31, name : 'thing2', duration : 6, success : true } ] } ])
+        .toNearlyEqual([ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ]);
     });
 });

@@ -86,6 +86,8 @@
         currentLeg = prevLeg;
 
         leg.duration = end - start;
+        root.totalDuration = end - root.t0;
+
         checkDone(root);
 
         if (error) {
