@@ -29,7 +29,7 @@ describe('Dials-Ajax', function() {
     it('should not record Ajax.Requests outside of tracked functions', function() {
         var json;
 
-        new Ajax.Request('base/test.json', {method: 'get', onSuccess: function(transport) {
+        new Ajax.Request('base/test-data/test.json', {method: 'get', onSuccess: function(transport) {
             json = transport.responseText;
         }});
 
@@ -47,7 +47,7 @@ describe('Dials-Ajax', function() {
         var json;
 
         var f = Dials.tracked(function myOp() {
-            new Ajax.Request('base/test.json', {
+            new Ajax.Request('base/test-data/test.json', {
                 method: 'get',
                 onSuccess: function onSuccess(transport) {
                     json = transport.responseText;
@@ -77,7 +77,7 @@ describe('Dials-Ajax', function() {
                 totalDuration: '*',
                 success: true,
                 calls: [{
-                    cause: 'ajax:base/test.json',
+                    cause: 'ajax:base/test-data/test.json',
                     name: 'onSuccess',
                     queued: 0,
                     started: '*',   // takes anywhere between 5ms and 300ms to complete the request
