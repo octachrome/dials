@@ -275,16 +275,23 @@ describe('Dials-Ajax', function() {
         });
     });
 
-    it('should ignore custom asynchronous callbacks outside a defined operation', function() {
-        function loadScript(url, onSuccess) {
-            Dials.fork(function(wrap) {
-                var script = document.createElement('script');
-                script.src = url;
-                script.onload = wrap(onSuccess);
-                document.body.appendChild(script);
-            });
-        }
+    function loadScript(url, onSuccess) {
+        Dials.fork(function(wrap) {
+            var script = document.createElement('script');
+            script.src = url;
+            var wrapped = wrap(onSuccess);
+            script.onreadystatechange = function() {
+                if (this.readyState == 'complete') {
+                    wrapped();
+                }
+            };
+            script.onload = wrapped();
+            var head = document.getElementsByTagName('head')[0];
+            head.appendChild(script);
+        });
+    }
 
+    it('should ignore custom asynchronous callbacks outside a defined operation', function() {
         expect(window.test1).not.toBe(true);
 
         var done;
@@ -293,8 +300,8 @@ describe('Dials-Ajax', function() {
         });
 
         waitsFor(function() {
-            return done;
-        }, 'Should load script');
+            return done && window.test1;
+        }, 'Should load script', 500);
 
         runs(function() {
             expect(window.test1).toBe(true);
@@ -303,15 +310,6 @@ describe('Dials-Ajax', function() {
     });
 
     it('should record custom asynchronous callbacks within defined operation', function() {
-        function loadScript(url, onSuccess) {
-            Dials.fork(function(wrap) {
-                var script = document.createElement('script');
-                script.src = url;
-                script.onload = wrap(onSuccess);
-                document.body.appendChild(script);
-            });
-        }
-
         expect(window.test2).not.toBe(true);
 
         var done;
@@ -325,8 +323,8 @@ describe('Dials-Ajax', function() {
         f();
 
         waitsFor(function() {
-            return done;
-        }, 'Should load script');
+            return done && window.test2;
+        }, 'Should load script', 500);
 
         runs(function() {
             expect(window.test2).toBe(true);

@@ -1,5 +1,9 @@
 'use strict';
 
+function isIE() {
+    return /MSIE|Trident/.test(navigator.userAgent);
+}
+
 function deepCopy(o) {
     if (o == null) {
         return null;
@@ -36,7 +40,7 @@ function nearlyEquals(o, a, delta) {
         return true;
     }
 
-    if (Array.isArray(a) && Array.isArray(o)) {
+    if (a instanceof Array && o instanceof Array) {
         if (a.length != o.length) {
             return false;
         }
@@ -57,6 +61,9 @@ function nearlyEquals(o, a, delta) {
                 if (diff > delta || diff < -delta) {
                     return false;
                 }
+            } else if (isIE() && key == 'name') {
+                // IE does not support Function.name
+                return true;
             } else if (!nearlyEquals.call(this, a[key], o[key])) {
                 return false;
             }

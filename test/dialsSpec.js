@@ -98,7 +98,7 @@ describe('Dials', function() {
         }, 'operation should complete', 100);
 
         runs(function() {
-            expect(timeoutValue).toBe('test');
+            if (!isIE()) expect(timeoutValue).toBe('test');
 
             expect(operations).toNearlyEqual([{
                 t0: t0,
@@ -270,18 +270,20 @@ describe('Dials', function() {
     });
 
     it('should not interfere with timeouts outside an operation', function() {
+        var timedOut;
         var timeoutValue = null;
         
         setTimeout(function(arg) {
+            timedOut = true;
             timeoutValue = arg;
         }, 1, 'arg');
 
         waitsFor(function() {
-            return timeoutValue;
-        }, 'timeout value should be set', 100);
+            return timedOut;
+        }, 'timeout should be called', 100);
 
         runs(function() {
-            expect(timeoutValue).toEqual('arg');
+            if (!isIE()) expect(timeoutValue).toEqual('arg');
             expect(operations).toEqual([]);
         });
     });
@@ -421,7 +423,7 @@ describe('Dials', function() {
         var t0 = now();
         var name = f();
 
-        expect(name).toEqual('func');
+        if (!isIE()) expect(name).toEqual('func');
     });
 
     it('should rename the current operation', function() {

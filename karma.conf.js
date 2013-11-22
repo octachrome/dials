@@ -62,8 +62,7 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ['Chrome'/*, 'Firefox'*/],
-
+    browsers: ['Chrome'/*, 'Firefox', 'sl_ie9_win', 'sl_ie10_win', 'sl_ie11_win'*/],
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
@@ -71,6 +70,54 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false
+    singleRun: false,
+
+    // global config for SauceLabs
+    sauceLabs: {
+      username: 'cdbrown',
+      accessKey: 'e07338f0-16e9-4131-a4b1-59f5c0b0eb60',
+      startConnect: true,
+      testName: 'Dials'
+    },
+
+    // define SL browsers
+    customLaunchers: {
+      sl_ie7_win: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows XP',
+        version: '7'
+      },
+      sl_ie8_win: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 7',
+        version: '8'
+      },
+      sl_ie9_win: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 7',
+        version: '9'
+      },
+      sl_ie10_win: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 7',
+        version: '10'
+      },
+      sl_ie11_win: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 8.1',
+        version: '11'
+      },
+      sl_safari_osx: {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        platform: 'OS X 10.6',
+        version: '5'
+      }
+    }
   });
 };
