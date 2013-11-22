@@ -40,3 +40,55 @@ describe('nearlyEquals', function() {
         .toNearlyEqual([ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ]);
     });
 });
+
+describe('deepCopy', function() {
+    it('should copy a number', function() {
+        expect(deepCopy(5)).toBe(5);
+    });
+
+    it('should copy a string', function() {
+        expect(deepCopy("test")).toBe("test");
+    });
+
+    it('should copy null', function() {
+        expect(deepCopy(null)).toBe(null);
+    });
+
+    it('should copy an array', function() {
+        var a = [1, 2, 3];
+        var copy = deepCopy(a);
+
+        expect(copy).toEqual(a);
+        expect(copy).not.toBe(a);
+    });
+
+    it('should copy an object', function() {
+        var o = {'x': 5};
+        var copy = deepCopy(o);
+
+        expect(copy).toEqual(o);
+        expect(copy).not.toBe(o);
+    });
+
+    it('should copy a complex object', function() {
+        var o = {
+            'a': [
+                {
+                    'b': [4]
+                }
+            ],
+            'c': {
+                'd': 5
+            }
+        };
+        var copy = deepCopy(o);
+
+        expect(copy).toEqual(o);
+
+        expect(copy).not.toBe(o);
+        expect(copy.a).not.toBe(o.a);
+        expect(copy.a[0]).not.toBe(o.a[0]);
+        expect(copy.a[0].b).not.toBe(o.a[0].b);
+        expect(copy.c).not.toBe(o.c);
+    });
+});

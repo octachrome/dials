@@ -1,5 +1,36 @@
 'use strict';
 
+function deepCopy(o) {
+    if (o == null) {
+        return null;
+    } else if (o instanceof Array) {
+        copy = [];
+        for (var i = 0; i < o.length; i++) {
+            copy[i] = deepCopy(o[i]);
+        }
+        return copy;
+    } else if (typeof o == 'object') {
+        var copy = {};
+        for (var key in o) {
+            if (o.hasOwnProperty(key)) {
+                copy[key] = deepCopy(o[key]);
+            }
+        }
+        return copy;
+    } else {
+        return o;
+    }
+}
+
+function now() {
+    return new Date().getTime();
+}
+
+function work(delay) {
+    var start = now();
+    while (now() - start < delay);
+}
+
 function nearlyEquals(o, a, delta) {
     if (a === o) {
         return true;

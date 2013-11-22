@@ -84,7 +84,7 @@ Now the callback will be invoked as soon as `f` completes, without waiting for `
 
 ## Extending Dials
 
-Dials currently detects timeouts installed using the `setTimeout` function, and Ajax calls initiated using the `Ajax.Request` function from Prototype (Dials must be included after Prototype in order to make this work). I may add support for other Ajax libraries if I need them. In the meantime it is relatively easy to implement them yourself using the `Dials.fork` function. This example defines a simplistic method which uses a dynamic script tag to implement cross-domain AJAX requests:
+Dials currently detects timeouts installed using the `setTimeout` function, and asynchronous Ajax calls initiated using XMLHttpRequest. The latter is currently unsupported in IE7 or earlier. You can add support for other asynchronous operations using the `Dials.fork` function. This example defines a simplistic method which uses a dynamic script tag to implement cross-domain AJAX requests:
 
     function ajaxCall(url, callback) {
         // The anonymous function below will be invoked immediately

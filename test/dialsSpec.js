@@ -1,15 +1,6 @@
 'use strict';
 
 describe('Dials', function() {
-    function now() {
-        return new Date().getTime();
-    }
-
-    function work(delay) {
-        var start = now();
-        while (now() - start <= delay);
-    }
-
     var operations;
 
     beforeEach(function () {

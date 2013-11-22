@@ -77,7 +77,9 @@
         var result, error;
         try {
             result = fn.apply(thisArg, args);
+            leg.success = true;
         } catch (e) {
+            leg.success = false;
             error = e;
         }
 
@@ -91,10 +93,8 @@
         checkDone(root);
 
         if (error) {
-            leg.success = false;
             throw error;
         } else {
-            leg.success = true;
             return result;
         }
     }
@@ -143,21 +143,15 @@
             var root = currentRoot;
             var parentLeg = currentLeg;
 
-            // The legs for all the sticky callbacks registered with fn
-            var stickies = [];
-
             /**
-             * Wraps a callback with the code to re-enter the operation. By default, the first callback that fires
-             * completes the operation (unless the callback registers any more async calls). This is because you often
-             * have an onSuccess and an onFailure callback, only one of which will fire. If the sticky flag is true,
-             * this callback will not complete the operation: it will wait for another callback. This is used on
-             * Ajax.Request's onComplete method, to wait for the final onFailure or onSuccess method.
+             * Wraps a callback with the code to re-enter the operation. The first to the wrapped callback completes
+             * the operation (unless the callback registers any more async calls). If you want to call the callback
+             * several times, you need to rewrap it.
              * @param cb {function} the callback to wrap
              * @param cause {string} a description of what triggered the callback
-             * @param sticky {boolean} well, it's a bit complicated
              * @return {function} a wrapped callback
              */
-            var wrap = function wrap(cb, cause, sticky) {
+            var wrap = function wrap(cb, cause) {
                 var leg = {
                     queued: now() - root.t0,
                     stackTrace: new Error().stack
@@ -170,11 +164,6 @@
                 }
                 parentLeg.calls = parentLeg.calls || [];
                 parentLeg.calls.push(leg);
-
-                if (!sticky) {
-                    // Register this callback as one which will should be cleaned up by other non-sticky callbacks
-                    stickies.push(leg);
-                }
 
                 var legId = nextId();
 
@@ -191,21 +180,6 @@
                         return invoke(this, cb, root, leg, args);
                     } finally {
                         delete abortFunctions[legId];
-
-                        if (!sticky) {
-                            // Non-sticky callbacks remove all other non-sticky callbacks from the calls list.
-                            for (var i = 0; i < stickies.length; i++) {
-                                var toDelete = stickies[i];
-                                if (toDelete != leg) {
-                                    var idx = parentLeg.calls.indexOf(toDelete);
-                                    if (idx >= 0) {
-                                        parentLeg.calls.splice(idx, 1);
-                                    }
-                                }
-                            }
-                            // It's nasty to have to check again; the invoke method already checked once
-                            checkDone(root);
-                        }
                     }
                 };
 
@@ -259,22 +233,35 @@
         }
     };
 
-    if (typeof Ajax == 'object' && Ajax.Request) {
-        var plainInitialize = Ajax.Request.prototype.initialize;
-        Ajax.Request.prototype.initialize = function Dials_Ajax_Request_initialize(url, options) {
+    if (typeof XMLHttpRequest == 'function' && XMLHttpRequest.prototype) {
+        var plainOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function Dials_XMLHttpRequest_open() {
+            this.Dials_url = arguments[1];
+            plainOpen.apply(this, arguments);
+        };
+
+        var plainSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.send = function Dials_XMLHttpRequest_send() {
+            var args = Array.prototype.slice.call(arguments, 0);
             var thisObj = this;
+            var url = this.Dials_url;
+
             return fork(function(wrap) {
                 var cause = 'ajax:' + url;
-                if (options.onSuccess) {
-                    options.onSuccess = wrap(options.onSuccess, cause);
+
+                if (thisObj.onreadystatechange) {
+                    var plain = thisObj.onreadystatechange;
+                    var wrapped = wrap(thisObj.onreadystatechange, cause);
+                    thisObj.onreadystatechange = function() {
+                        if (thisObj.readyState == 4) {
+                            return wrapped();
+                        } else {
+                            return plain();
+                        }
+                    };
                 }
-                if (options.onFailure) {
-                    options.onFailure = wrap(options.onFailure, cause);
-                }
-                if (options.onComplete) {
-                    options.onComplete = wrap(options.onComplete, cause, true);
-                }
-                return plainInitialize.call(thisObj, url, options);
+
+                return plainSend.apply(thisObj, args);
             });
         };
     }

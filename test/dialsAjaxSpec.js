@@ -1,22 +1,13 @@
 'use strict';
 
 describe('Dials-Ajax', function() {
-    function now() {
-        return new Date().getTime();
-    }
-
-    function work(delay) {
-        var start = now();
-        while (now() - start < delay);
-    }
-
     var operations;
 
     beforeEach(function () {
         operations = [];
 
         Dials.onComplete(function(op) {
-            operations.push(op);
+            operations.push(deepCopy(op));
         });
 
         this.addMatchers({
@@ -35,7 +26,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return json;
-        }, 'Ajax request should succeed');
+        }, 'Ajax request should succeed', 1000);
 
         runs(function() {
             expect(/{"test":true}/.match(json)).toBe(true);
@@ -50,7 +41,10 @@ describe('Dials-Ajax', function() {
             new Ajax.Request('base/test-data/test.json', {
                 method: 'get',
                 onSuccess: function onSuccess(transport) {
-                    json = transport.responseText;
+                    var j = transport.responseText;
+                    setTimeout(function nested() {
+                        json = j;
+                    }, 1);
                 },
                 onFailure: function onFailure() {
                     // do nothing
@@ -63,7 +57,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return json;
-        }, 'Ajax request should succeed');
+        }, 'Ajax request should succeed', 1000);
 
         runs(function() {
             expect(/{"test":true}/.match(json)).toBe(true);
@@ -77,19 +71,26 @@ describe('Dials-Ajax', function() {
                 totalDuration: '*',
                 success: true,
                 calls: [{
-                    cause: 'ajax:base/test-data/test.json',
-                    name: 'onSuccess',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
-                    success: true
-                },
-                {
                     cause: 'timeout',   // a timeout set by prototype.js internally
                     queued: 0,
                     started: '*',
                     duration: 0,
                     success: true
+                },
+                {
+                    cause: 'ajax:base/test-data/test.json',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true,
+                    calls: [{
+                        cause: 'timeout',
+                        name: 'nested',
+                        queued: '*',
+                        started: '*',
+                        duration: 0,
+                        success: true
+                    }]
                 }]
             }]);
         })
@@ -105,7 +106,9 @@ describe('Dials-Ajax', function() {
                     // do nothing
                 },
                 onFailure: function onFailure() {
-                    failed = true;
+                    setTimeout(function nested() {
+                        failed = true;
+                    }, 1);
                 }
             });
         });
@@ -127,19 +130,25 @@ describe('Dials-Ajax', function() {
                 totalDuration: '*',
                 success: true,
                 calls: [{
-                    cause: 'ajax:base/missing.json',
-                    name: 'onFailure',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
-                    success: true
-                },
-                {
                     cause: 'timeout',   // a timeout set by prototype.js internally
                     queued: 0,
                     started: '*',
                     duration: 0,
                     success: true
+                },{
+                    cause: 'ajax:base/missing.json',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true,
+                    calls: [{
+                        cause: 'timeout',
+                        name: 'nested',
+                        queued: '*',
+                        started: '*',
+                        duration: 0,
+                        success: true
+                    }]
                 }]
             }]);
         });
@@ -174,17 +183,16 @@ describe('Dials-Ajax', function() {
                 totalDuration: '*',
                 success: true,
                 calls: [{
-                    cause: 'ajax:base/missing.json',
-                    name: 'onComplete',
+                    cause: 'timeout',   // a timeout set by prototype.js internally
                     queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    started: '*',
                     duration: 0,
                     success: true
                 },
                 {
-                    cause: 'timeout',   // a timeout set by prototype.js internally
+                    cause: 'ajax:base/missing.json',
                     queued: 0,
-                    started: '*',
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
                     duration: 0,
                     success: true
                 }]
@@ -193,8 +201,8 @@ describe('Dials-Ajax', function() {
     });
 
     it('should record completion of Ajax.Requests with onComplete, onSuccess and onFailure callbacks', function() {
-        var complete;
         var failed;
+        var complete;
 
         var f = Dials.tracked(function myOp() {
             new Ajax.Request('base/missing.json', {
@@ -203,10 +211,14 @@ describe('Dials-Ajax', function() {
                     // do nothing
                 },
                 onFailure: function onFailure() {
-                    failed = true;
+                    setTimeout(function failure() {
+                        failed = true;
+                    }, 1);
                 },
                 onComplete: function onComplete() {
-                    complete = true;
+                    setTimeout(function completion() {
+                        complete = true;
+                    }, 1);
                 }
             });
         });
@@ -215,7 +227,7 @@ describe('Dials-Ajax', function() {
         f();
 
         waitsFor(function() {
-            return complete;
+            return failed && complete;
         }, 'Ajax request should have completed');
 
         runs(function() {
@@ -230,25 +242,34 @@ describe('Dials-Ajax', function() {
                 totalDuration: '*',
                 success: true,
                 calls: [{
-                    cause: 'ajax:base/missing.json',
-                    name: 'onFailure',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
-                    success: true
-                },{
-                    cause: 'ajax:base/missing.json',
-                    name: 'onComplete',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
-                    success: true
-                },{
                     cause: 'timeout',   // a timeout set by prototype.js internally
                     queued: 0,
                     started: '*',
                     duration: 0,
                     success: true
+                },
+                {
+                    cause: 'ajax:base/missing.json',
+                    queued: 0,
+                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: 0,
+                    success: true,
+                    calls: [                    {
+                        cause: 'timeout',
+                        name: 'failure',
+                        queued: '*',
+                        started: '*',
+                        duration: 0,
+                        success: true
+                    },
+                    {
+                        cause: 'timeout',
+                        name: 'completion',
+                        queued: '*',
+                        started: '*',
+                        duration: 0,
+                        success: true
+                    }]
                 }]
             }]);
         });
