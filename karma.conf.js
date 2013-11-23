@@ -62,7 +62,17 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ['Chrome'/*, 'Firefox', 'sl_ie9_win', 'sl_ie10_win', 'sl_ie11_win'*/],
+    browsers: [
+        'Chrome',
+        // 'Firefox',
+        // 'sl_ie7_win',    -- not supported
+        // 'sl_ie9_win',
+        // 'sl_ie9_win',
+        // 'sl_ie10_win',   -- fails to load
+        // 'sl_ie11_win',
+        // 'sl_safari_osx',
+    ],
+
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,

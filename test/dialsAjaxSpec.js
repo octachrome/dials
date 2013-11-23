@@ -278,7 +278,6 @@ describe('Dials-Ajax', function() {
     function loadScript(url, onSuccess) {
         Dials.fork(function(wrap) {
             var script = document.createElement('script');
-            script.src = url;
             var wrapped = wrap(onSuccess);
             script.onreadystatechange = function() {
                 if (this.readyState == 'complete') {
@@ -286,6 +285,7 @@ describe('Dials-Ajax', function() {
                 }
             };
             script.onload = wrapped();
+            script.src = url;
             var head = document.getElementsByTagName('head')[0];
             head.appendChild(script);
         });
@@ -301,7 +301,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return done && window.test1;
-        }, 'Should load script', 500);
+        }, 'Should load script');
 
         runs(function() {
             expect(window.test1).toBe(true);
@@ -324,7 +324,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return done && window.test2;
-        }, 'Should load script', 500);
+        }, 'Should load script');
 
         runs(function() {
             expect(window.test2).toBe(true);

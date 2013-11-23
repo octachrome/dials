@@ -233,7 +233,7 @@
         }
     };
 
-    if (typeof XMLHttpRequest == 'function' && XMLHttpRequest.prototype) {
+    if (typeof XMLHttpRequest != 'undefined' && XMLHttpRequest.prototype) {
         var plainOpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function Dials_XMLHttpRequest_open() {
             this.Dials_url = arguments[1];
