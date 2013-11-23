@@ -15,7 +15,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       {pattern: 'test-data/*', included: false},
-      'lib/prototype-1.7.1.0.js',
+      'lib/*.js',
       '**/*.js'
     ],
 
@@ -68,7 +68,7 @@ module.exports = function(config) {
         // 'sl_ie7_win',    -- not supported
         // 'sl_ie9_win',
         // 'sl_ie9_win',
-        // 'sl_ie10_win',   -- fails to load
+        // 'sl_ie10_win'
         // 'sl_ie11_win',
         // 'sl_safari_osx',
     ],
