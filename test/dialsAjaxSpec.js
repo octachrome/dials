@@ -11,9 +11,7 @@ describe('Dials-Ajax', function() {
         });
 
         this.addMatchers({
-            toNearlyEqual: function(o) {
-                return nearlyEquals.call(this, this.actual, o, 5);
-            }
+            toNearlyEqual: toNearlyEqual
         });
     });
 

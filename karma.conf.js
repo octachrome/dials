@@ -28,7 +28,7 @@ module.exports = function(config) {
 
     preprocessors: {
       '*.js': 'coverage',
-      'test/nearlyEquals.js': 'coverage'
+      'test/testUtil.js': 'coverage'
     },
 
 
@@ -65,7 +65,7 @@ module.exports = function(config) {
     browsers: [
         'Chrome',
         // 'Firefox',
-        // 'sl_ie7_win',    -- not supported
+        // 'sl_ie7_win',
         // 'sl_ie9_win',
         // 'sl_ie9_win',
         // 'sl_ie10_win'

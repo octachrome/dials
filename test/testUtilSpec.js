@@ -3,9 +3,7 @@
 describe('nearlyEquals', function() {
     beforeEach(function () {
         this.addMatchers({
-            toNearlyEqual: function(o) {
-                return nearlyEquals.call(this, this.actual, o, 5);
-            }
+            toNearlyEqual: toNearlyEqual
         });
     });
 
@@ -47,7 +45,7 @@ describe('deepCopy', function() {
     });
 
     it('should copy a string', function() {
-        expect(deepCopy("test")).toBe("test");
+        expect(deepCopy('test')).toBe('test');
     });
 
     it('should copy null', function() {
@@ -90,5 +88,252 @@ describe('deepCopy', function() {
         expect(copy.a[0]).not.toBe(o.a[0]);
         expect(copy.a[0].b).not.toBe(o.a[0].b);
         expect(copy.c).not.toBe(o.c);
+    });
+});
+
+describe('isNearlyEqual assertion failure messages', function() {
+    function MockValue(actual) {
+        this.env = jasmine.getEnv();
+        this.actual = actual;
+    }
+
+    it('should give correct message for number', function() {
+        var mockValue = new MockValue(5);
+        var result = toNearlyEqual.call(mockValue, 4);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('5\t\texpected 4');
+    });
+
+    it('should give correct message for object', function() {
+        var mockValue = new MockValue({ a: 5 });
+        var result = toNearlyEqual.call(mockValue, { a: 4 });
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\n a: 5\t\texpected 4');
+    });
+
+    it('should give correct message for array', function() {
+        var mockValue = new MockValue([5]);
+        var result = toNearlyEqual.call(mockValue, [4]);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('[\n 5\t\texpected 4');
+    });
+
+    it('should give correct message for number compared to object', function() {
+        var mockValue = new MockValue(5);
+        var result = toNearlyEqual.call(mockValue, { a: 5 });
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('5\t\texpected <object>');
+    });
+
+    it('should give correct message for object compared to number', function() {
+        var mockValue = new MockValue({ a : 5 });
+        var result = toNearlyEqual.call(mockValue, 5);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\t\texpected 5');
+    });
+
+    it('should give correct message for object compared to null', function() {
+        var mockValue = new MockValue({});
+        var result = toNearlyEqual.call(mockValue, null);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\t\texpected null');
+    });
+
+    it('should give correct message for null compared to object', function() {
+        var mockValue = new MockValue(null);
+        var result = toNearlyEqual.call(mockValue, {});
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('null\t\texpected <object>');
+    });
+
+    it('should give correct message for object compared to array', function() {
+        var mockValue = new MockValue({ a : 5 });
+        var result = toNearlyEqual.call(mockValue, [5]);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\t\texpected <array>');
+    });
+
+    it('should give correct message for array compared to object', function() {
+        var mockValue = new MockValue([5]);
+        var result = toNearlyEqual.call(mockValue, { a : 5 });
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('[\t\texpected <object>');
+    });
+
+    it('should give correct message for array compared to number', function() {
+        var mockValue = new MockValue([5]);
+        var result = toNearlyEqual.call(mockValue, 5);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('[\t\texpected 5');
+    });
+
+    it('should give correct message for number compared to array', function() {
+        var mockValue = new MockValue(5);
+        var result = toNearlyEqual.call(mockValue, [5]);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('5\t\texpected <array>');
+    });
+
+    it('should give correct message for array compared to null', function() {
+        var mockValue = new MockValue([]);
+        var result = toNearlyEqual.call(mockValue, null);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('[\t\texpected null');
+    });
+
+    it('should give correct message for null compared to array', function() {
+        var mockValue = new MockValue(null);
+        var result = toNearlyEqual.call(mockValue, []);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('null\t\texpected <array>');
+    });
+
+    it('should give correct message for number compared to null', function() {
+        var mockValue = new MockValue(5);
+        var result = toNearlyEqual.call(mockValue, null);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('5\t\texpected null');
+    });
+
+    it('should give correct message for null compared to number', function() {
+        var mockValue = new MockValue(null);
+        var result = toNearlyEqual.call(mockValue, 5);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('null\t\texpected 5');
+    });
+
+    it('should give correct message for object containing wrong type of element', function() {
+        var mockValue = new MockValue({a: [5]});
+        var result = toNearlyEqual.call(mockValue, {a: {b: 5}});
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\n a: [\t\texpected <object>');
+    });
+
+    it('should give correct message for array containing wrong type of element', function() {
+        var mockValue = new MockValue([{a: 5}]);
+        var result = toNearlyEqual.call(mockValue, [5]);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('[\n {\t\texpected 5');
+    });
+
+    it('should give correct message for complex object comparison', function() {
+        var mockValue = new MockValue({
+            a: [
+                {
+                    b: [5, 6],
+                    c: {
+                        d: 'test'
+                    }
+                }
+            ],
+            e: null
+        });
+        var result = toNearlyEqual.call(mockValue, {
+            a: [
+                {
+                    b: [5, 6],
+                    c: {
+                        d: 'test'
+                    }
+                }
+            ],
+            e: 5
+        });
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe(
+            '{\n' +
+            ' a: [\n' +
+            '  {\n' +
+            '   b: [\n' +
+            '    5,\n' +
+            '    6\n' +
+            '   ],\n' +
+            '   c: {\n' +
+            '    d: test\n' +
+            '   }\n' + 
+            '  }\n' +
+            ' ],\n' +
+            ' e: null\t\texpected 5');
+    });
+
+    it('should give correct message for unexpected object key', function() {
+        var mockValue = new MockValue({a: 4});
+        var result = toNearlyEqual.call(mockValue, {});
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\n a: \t\tunexpected key');
+    });
+
+    it('should give correct message for missing object key', function() {
+        var mockValue = new MockValue({});
+        var result = toNearlyEqual.call(mockValue, {a: 4});
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\n\t\tmissing key: a');
+    });
+
+    it('should give correct message for unexpected array element', function() {
+        var mockValue = new MockValue([4, 5]);
+        var result = toNearlyEqual.call(mockValue, [4]);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('[\n 4,\n 5\t\texpected null');
+    });
+
+    it('should give correct message for missing array element', function() {
+        var mockValue = new MockValue([4]);
+        var result = toNearlyEqual.call(mockValue, [4, 5]);
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('[\n 4\n\t\texpected 5 (missing element)');
+    });
+
+    it('should give correct message for delta match', function() {
+        var mockValue = new MockValue({t0: 123});
+        var result = toNearlyEqual.call(mockValue, {t0: 456});
+
+        expect(result).toBeFalsy();
+
+        expect(mockValue.message()[0]).toBe('{\n t0: 123\t\texpected ~456');
     });
 });

@@ -11,10 +11,7 @@ describe('Dials', function() {
         });
 
         this.addMatchers({
-            toNearlyEqual: function(o) {
-                // 5 is good enough for Chrome; Firefox is sometimes 20ms off
-                return nearlyEquals.call(this, this.actual, o, 5);
-            }
+            toNearlyEqual: toNearlyEqual
         });
     });
 
