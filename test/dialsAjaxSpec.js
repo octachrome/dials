@@ -341,7 +341,7 @@ describe('Dials-Ajax', function() {
                     started : '*',
                     duration : 0,
                     success : true
-                }],
+                }]
             }]);
         });
     });
