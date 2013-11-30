@@ -347,7 +347,7 @@ describe('Dials', function() {
                 started: 0,
                 duration: 0,
                 success: true
-            }],
+            }]
         }]);
     });
 
@@ -387,7 +387,7 @@ describe('Dials', function() {
                 started: 0,
                 duration: 0,
                 success: false
-            }],
+            }]
         }]);
     });
 
