@@ -39,7 +39,6 @@ describe('nearlyEquals', function() {
     });
 
     it('should detect missing elements from nested arrays', function() {
-        console.log('start');
         expect([{
             t0: 0,
             name: 'myOp',
@@ -85,7 +84,6 @@ describe('nearlyEquals', function() {
                 }]
             }]
         }]);
-        console.log('end');
     });
 });
 
