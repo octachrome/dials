@@ -100,11 +100,23 @@
     }
 
     /**
+     * Implementation of Array.indexOf for IE7.
+     */
+    function indexOf(array, element) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i] == element) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Check whether the given operation is complete, and if so fires the onComplete listener.
      */
     function checkDone(op) {
         try {
-            var i = activeOps.indexOf(op);
+            var i = indexOf(activeOps, op);
             if (i >= 0 && isLegComplete(op)) {
                 activeOps.splice(i, 1);
                 onComplete && onComplete(op);
@@ -168,7 +180,7 @@
                 var legId = nextId();
 
                 abortFunctions[legId] = function abort() {
-                    var idx = parentLeg.calls.indexOf(leg);
+                    var idx = indexOf(parentLeg.calls, leg);
                     if (idx >= 0) {
                         parentLeg.calls.splice(idx, 1);
                     }
