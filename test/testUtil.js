@@ -136,8 +136,7 @@ function toNearlyEqual(o) {
                         return false;
                     }
                 } else if (isIE() && key == 'name') {
-                    // IE does not support Function.name
-                    return true;
+                    // Skip: IE does not support Function.name
                 } else if (!nearlyEquals.call(this, o[key], a[key], delta)) {
                     return false;
                 }

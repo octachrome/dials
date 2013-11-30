@@ -37,6 +37,56 @@ describe('nearlyEquals', function() {
         expect(        [ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 26, success : true, calls : [ { queued : 21, started : 31, name : 'thing2', duration : 6, success : true } ] } ])
         .toNearlyEqual([ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ]);
     });
+
+    it('should detect missing elements from nested arrays', function() {
+        console.log('start');
+        expect([{
+            t0: 0,
+            name: 'myOp',
+            queued: 0,
+            started: 0,
+            duration: 0,
+            totalDuration: '*',
+            success: true,
+            calls: [{
+                cause: 'timeout',
+                queued: 0,
+                started: '*',
+                duration: 0,
+                success: true
+            }]
+        }]).not.toNearlyEqual([{
+            t0: 0,
+            name: 'myOp',
+            queued: 0,
+            started: 0,
+            duration: 0,
+            totalDuration: '*',
+            success: true,
+            calls: [{
+                cause: 'timeout',
+                queued: 0,
+                started: '*',
+                duration: 0,
+                success: true
+            },{
+                cause: 'ajax:base/missing.json',
+                queued: 0,
+                started: '*',
+                duration: 0,
+                success: true,
+                calls: [{
+                    cause: 'timeout',
+                    name: 'nested',
+                    queued: '*',
+                    started: '*',
+                    duration: 0,
+                    success: true
+                }]
+            }]
+        }]);
+        console.log('end');
+    });
 });
 
 describe('deepCopy', function() {
