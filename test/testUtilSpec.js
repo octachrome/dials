@@ -385,3 +385,117 @@ describe('isNearlyEqual assertion failure messages', function() {
         expect(mockValue.message()[0]).toBe('{\n t0: 123\t\texpected ~456');
     });
 });
+
+function mockTest(f) {
+    var env = jasmine.currentEnv_;
+    jasmine.currentEnv_ = new jasmine.Env();
+
+    var spec;
+    describe('mock suite', function() {
+        spec = it('mock spec', f);
+    });
+    installNearlyEquals(spec);
+    spec.execute();
+
+    var result = spec.results();
+    jasmine.currentEnv_ = env;
+    return result;
+}
+
+describe('embedded object matchers', function() {
+    beforeEach(function() {
+        installNearlyEquals(this);
+    });
+
+    it('should pass for correct assertion on object property', function() {
+        var result = mockTest(function() {
+            expect({
+                a: 5
+            }).toNearlyEqual({
+                a: this.expect.toBe(5)
+            });
+        });
+        expect(result.totalCount).toBe(2);
+        expect(result.failedCount).toBe(0);
+    });
+
+    it('should fail for incorrect assertion on object property', function() {
+        var result = mockTest(function() {
+            expect({
+                a: 5
+            }).toNearlyEqual({
+                a: this.expect.toBe(6)
+            });
+        });
+        expect(result.totalCount).toBe(2);
+        expect(result.failedCount).toBe(1);
+    });
+
+    it('should pass for correct assertion on array element', function() {
+        var result = mockTest(function() {
+            expect([
+                5
+            ]).toNearlyEqual([
+                this.expect.toBe(5)
+            ]);
+        });
+        expect(result.totalCount).toBe(2);
+        expect(result.failedCount).toBe(0);
+    });
+
+    it('should fail for incorrect assertion on array element', function() {
+        var result = mockTest(function() {
+            expect([
+                5
+            ]).toNearlyEqual([
+                this.expect.toBe(6)
+            ]);
+        });
+        expect(result.totalCount).toBe(2);
+        expect(result.failedCount).toBe(1);
+    });
+
+    it('should fail for incorrect equal assertion', function() {
+        var result = mockTest(function() {
+            expect({
+                a: 5
+            }).toNearlyEqual({
+                a: this.expect.toEqual(6)
+            });
+        });
+        expect(result.totalCount).toBe(2);
+        expect(result.failedCount).toBe(1);
+    });
+
+    it('should pass for correct inverted equal assertion', function() {
+        var result = mockTest(function() {
+            expect({
+                a: 5
+            }).toNearlyEqual({
+                a: this.expect.not.toEqual(6)
+            });
+        });
+        expect(result.totalCount).toBe(2);
+        expect(result.failedCount).toBe(0);
+    });
+
+    it('should fail for incorrect inverted equal assertion', function() {
+        var result = mockTest(function() {
+            expect({
+                a: 5
+            }).toNearlyEqual({
+                a: this.expect.not.toEqual(5)
+            });
+        });
+        expect(result.totalCount).toBe(2);
+        expect(result.failedCount).toBe(1);
+    });
+
+    it('should run without throwing', function() {
+        expect({
+            a: 5
+        }).toNearlyEqual({
+            a: this.expect.toBe(5)
+        });
+    });
+});

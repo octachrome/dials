@@ -93,7 +93,10 @@ function toNearlyEqual(o) {
                     msg(',\n');
                 }
                 msg(indent);
-                if (!nearlyEquals.call(this, o[i], a[i], delta)) {
+                var expected = o[i];
+                if (typeof expected == 'function' && expected.matcher) {
+                    expected(a[i]);
+                } else if (!nearlyEquals.call(this, o[i], a[i], delta)) {
                     return false;
                 }
             }
@@ -127,18 +130,25 @@ function toNearlyEqual(o) {
                 if (!(key in o)) {
                     msg('\t\tunexpected key');
                     return false;
-                } else if (key == 't0' || key == 'queued' || key == 'started' || key == 'duration'
-                    || key == 'totalDuration') {
-                    var diff = o[key] - a[key];
-                    if (diff > delta || diff < -delta) {
-                        msg(a[key]);
-                        expect('~' + o[key]);
-                        return false;
+                } else {
+                    var expected = o[key];
+                    if (typeof expected == 'function' && expected.matcher) {
+                        expected(a[key]);
+                    } else {
+                        if (key == 't0' || key == 'queued' || key == 'started' || key == 'duration'
+                            || key == 'totalDuration') {
+                            var diff = o[key] - a[key];
+                            if (diff > delta || diff < -delta) {
+                                msg(a[key]);
+                                expect('~' + o[key]);
+                                return false;
+                            }
+                        } else if (isIE() && key == 'name') {
+                            // Skip: IE does not support Function.name
+                        } else if (!nearlyEquals.call(this, o[key], a[key], delta)) {
+                            return false;
+                        }
                     }
-                } else if (isIE() && key == 'name') {
-                    // Skip: IE does not support Function.name
-                } else if (!nearlyEquals.call(this, o[key], a[key], delta)) {
-                    return false;
                 }
             }
             for (var key in o) {
@@ -168,4 +178,36 @@ function toNearlyEqual(o) {
 
     // 5 is good enough for Chrome; timeouts in Firefox are sometimes 20ms off
     return nearlyEquals.call(this, o, this.actual, 5);
+}
+
+function createMatcher(m, invert) {
+    return function(expected) {
+        var matcher = function(actual) {
+            if (invert) {
+                (expect(actual).not[m])(expected);
+            } else {
+                (expect(actual)[m])(expected);
+            }
+        }
+        matcher.matcher = true;
+        return matcher;
+    };
+}
+
+function createMatchers(spec) {
+    spec.expect.not = {};
+    var matchersClass = spec.getMatchersClass_();
+    for (var key in matchersClass.prototype) {
+        if (key != 'report') {
+            spec.expect[key] = createMatcher(key);            
+            spec.expect.not[key] = createMatcher(key, true);            
+        }
+    }
+}
+
+function installNearlyEquals(spec) {
+    spec.addMatchers({
+        toNearlyEqual: toNearlyEqual
+    });
+    createMatchers(spec);
 }
