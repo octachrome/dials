@@ -35,7 +35,7 @@ function work(delay) {
     while (now() - start < delay);
 }
 
-function toNearlyEqual(o) {
+function toFit(o) {
     var message = '';
     var indent = '';
 
@@ -67,7 +67,7 @@ function toNearlyEqual(o) {
         indent = indent.substring(1);
     }
 
-    function nearlyEquals(o, a, delta) {
+    function fits(o, a) {
         if (a == null) {
             msg('null');
 
@@ -96,7 +96,7 @@ function toNearlyEqual(o) {
                 var expected = o[i];
                 if (typeof expected == 'function' && expected.matcher) {
                     expected(a[i]);
-                } else if (!nearlyEquals.call(this, o[i], a[i], delta)) {
+                } else if (!fits.call(this, o[i], a[i])) {
                     return false;
                 }
             }
@@ -134,27 +134,20 @@ function toNearlyEqual(o) {
                     var expected = o[key];
                     if (typeof expected == 'function' && expected.matcher) {
                         expected(a[key]);
-                    } else {
-                        if (key == 't0' || key == 'queued' || key == 'started' || key == 'duration'
-                            || key == 'totalDuration') {
-                            var diff = o[key] - a[key];
-                            if (diff > delta || diff < -delta) {
-                                msg(a[key]);
-                                expect('~' + o[key]);
-                                return false;
-                            }
-                        } else if (isIE() && key == 'name') {
-                            // Skip: IE does not support Function.name
-                        } else if (!nearlyEquals.call(this, o[key], a[key], delta)) {
-                            return false;
-                        }
+                    } else if (!fits.call(this, o[key], a[key])) {
+                        return false;
                     }
                 }
             }
             for (var key in o) {
                 if (!(key in a)) {
-                    msg('\t\tmissing key: ' + key + '');
-                    return false;
+                    var expected = o[key];
+                    if (typeof expected == 'function' && expected.matcher) {
+                        expected(a[key]);
+                    } else {
+                        msg('\t\tmissing key: ' + key + '');
+                        return false;
+                    }
                 }
             }
             decIndent();
@@ -176,8 +169,7 @@ function toNearlyEqual(o) {
         return [message];
     };
 
-    // 5 is good enough for Chrome; timeouts in Firefox are sometimes 20ms off
-    return nearlyEquals.call(this, o, this.actual, 5);
+    return fits.call(this, o, this.actual);
 }
 
 function createMatcher(m, invert) {
@@ -205,9 +197,9 @@ function createMatchers(spec) {
     }
 }
 
-function installNearlyEquals(spec) {
+function installMatchers(spec) {
     spec.addMatchers({
-        toNearlyEqual: toNearlyEqual
+        toFit: toFit
     });
     createMatchers(spec);
 }

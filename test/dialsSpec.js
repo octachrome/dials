@@ -11,8 +11,19 @@ describe('Dials', function() {
         });
 
         this.addMatchers({
-            toNearlyEqual: toNearlyEqual
+            toBeAtLeast: function(expected) {
+                return this.actual >= expected;
+            },
+
+            /**
+             * An equality test which is ignored for IE browsers (IE does not support the Function.name property),
+             */
+            toBeUnlessIE: function(expected) {
+                return this.actual == expected || isIE();
+            }
         });
+
+        installMatchers(this);
     });
 
     it('should record a simple function call', function() {
@@ -27,13 +38,13 @@ describe('Dials', function() {
 
         expect(result).toBe(5);
 
-        expect(operations).toNearlyEqual([{
-            t0: t0,
-            name: 'add',
-            queued: 0,
-            started: 0,
-            duration: 0,
-            totalDuration: 0,
+        expect(operations).toFit([{
+            name: this.expect.toBeUnlessIE('add'),
+            t0: this.expect.toBeAtLeast(t0),
+            queued: this.expect.toBeAtLeast(0),
+            started: this.expect.toBeAtLeast(0),
+            duration: this.expect.toBeAtLeast(0),
+            totalDuration: this.expect.toBeAtLeast(0),
             success: true
         }]);
     });
@@ -55,13 +66,13 @@ describe('Dials', function() {
 
         expect(error).not.toBe(null);
 
-        expect(operations).toNearlyEqual([{
-            t0: t0,
-            name: 'throwError',
-            queued: 0,
-            started: 0,
-            duration: 0,
-            totalDuration: 0,
+        expect(operations).toFit([{
+            name: this.expect.toBeUnlessIE('throwError'),
+            t0: this.expect.toBeAtLeast(t0),
+            queued: this.expect.toBeAtLeast(0),
+            started: this.expect.toBeAtLeast(0),
+            duration: this.expect.toBeAtLeast(0),
+            totalDuration: this.expect.toBeAtLeast(0),
             success: false
         }]);
     });
@@ -97,20 +108,20 @@ describe('Dials', function() {
         runs(function() {
             if (!isIE()) expect(timeoutValue).toBe('test');
 
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                queued: 0,
-                started: 0,
-                name: 'thing1',
-                duration: 25,
-                totalDuration: 35,
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('thing1'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(25),
+                totalDuration: this.expect.toBeAtLeast(35),
                 success: true,
                 calls: [{
                     cause: 'timeout',
-                    queued: 20,
-                    started: 30,
-                    name: 'thing2',
-                    duration: 5,
+                    name: this.expect.toBeUnlessIE('thing2'),
+                    queued: this.expect.toBeAtLeast(20),
+                    started: this.expect.toBeAtLeast(30),
+                    duration: this.expect.toBeAtLeast(5),
                     success: true
                 }]
             }]);
@@ -142,36 +153,36 @@ describe('Dials', function() {
 
         runs(function() {
             // thing2 finishes first, because it has a shorter timeout
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                queued: 0,
-                started: 0,
-                name: 'thing2',
-                duration: 0,
-                totalDuration: 10,
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('thing2'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(9),
                 success: true,
                 calls: [{
                     cause: 'timeout',
-                    queued: 0,
-                    started: 10,
-                    name: 'thing2a',
-                    duration: 0,
+                    name: this.expect.toBeUnlessIE('thing2a'),
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(9),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 }]
             },{
-                t0: t0,
-                queued: 0,
-                started: 0,
-                name: 'thing1',
-                duration: 0,
-                totalDuration: 30,
+                name: this.expect.toBeUnlessIE('thing1'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(30),
                 success: true,
                 calls: [{
                     cause: 'timeout',
-                    queued: 0,
-                    started: 30,
-                    name: 'thing1a',
-                    duration: 0,
+                    name: this.expect.toBeUnlessIE('thing1a'),
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(30),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 }]
             }]);
@@ -192,13 +203,13 @@ describe('Dials', function() {
         var t0 = now();
         f();
 
-        expect(operations).toNearlyEqual([{
-            t0: t0,
-            name: 'outer',
-            queued: 0,
-            started: 0,
-            duration: 0,
-            totalDuration: 0,
+        expect(operations).toFit([{
+            name: this.expect.toBeUnlessIE('outer'),
+            t0: this.expect.toBeAtLeast(t0),
+            queued: this.expect.toBeAtLeast(0),
+            started: this.expect.toBeAtLeast(0),
+            duration: this.expect.toBeAtLeast(0),
+            totalDuration: this.expect.toBeAtLeast(0),
             success: true
         }]);
 
@@ -208,13 +219,13 @@ describe('Dials', function() {
 
         runs(function() {
             // No change
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                name: 'outer',
-                queued: 0,
-                started: 0,
-                duration: 0,
-                totalDuration: 0,
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('outer'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(0),
                 success: true
             }]);
         });
@@ -246,20 +257,20 @@ describe('Dials', function() {
         runs(function() {
             expect(stuff).toEqual(['a', 'b']);
 
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                name: 'outer',
-                queued: 0,
-                started: 0,
-                duration: 0,
-                totalDuration: 10,
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('outer'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(0),
                 success: true,
                 calls: [{
                     cause: 'timeout',
-                    name: 'inner2',
-                    queued: 0,
-                    started: 10,
-                    duration: 0,
+                    name: this.expect.toBeUnlessIE('inner2'),
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(0),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 }]
             }]);
@@ -333,19 +344,19 @@ describe('Dials', function() {
         f();
 
         expect(result).toBe(6);
-        expect(operations).toNearlyEqual([{
-            t0: t0,
-            name: 'op',
-            queued: 0,
-            started: 0,
-            duration: 0,
-            totalDuration: 0,
+        expect(operations).toFit([{
+            name: this.expect.toBeUnlessIE('op'),
+            t0: this.expect.toBeAtLeast(t0),
+            queued: this.expect.toBeAtLeast(0),
+            started: this.expect.toBeAtLeast(0),
+            duration: this.expect.toBeAtLeast(0),
+            totalDuration: this.expect.toBeAtLeast(0),
             success: true,
             calls: [{
-                name: 'onSuccess',
-                queued: 0,
-                started: 0,
-                duration: 0,
+                name: this.expect.toBeUnlessIE('onSuccess'),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
                 success: true
             }]
         }]);
@@ -373,19 +384,19 @@ describe('Dials', function() {
         var t0 = now();
         f();
 
-        expect(operations).toNearlyEqual([{
-            t0: t0,
-            name: 'op',
-            queued: 0,
-            started: 0,
-            duration: 0,
-            totalDuration: 0,
+        expect(operations).toFit([{
+            name: this.expect.toBeUnlessIE('op'),
+            t0: this.expect.toBeAtLeast(t0),
+            queued: this.expect.toBeAtLeast(0),
+            started: this.expect.toBeAtLeast(0),
+            duration: this.expect.toBeAtLeast(0),
+            totalDuration: this.expect.toBeAtLeast(0),
             success: true,
             calls: [{
-                name: 'onSuccess',
-                queued: 0,
-                started: 0,
-                duration: 0,
+                name: this.expect.toBeUnlessIE('onSuccess'),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
                 success: false
             }]
         }]);
@@ -431,13 +442,13 @@ describe('Dials', function() {
         var t0 = now();
         f();
 
-        expect(operations).toNearlyEqual([{
-            t0: t0,
-            name: 'my operation',
-            queued: 0,
-            started: 0,
-            duration: 0,
-            totalDuration: 0,
+        expect(operations).toFit([{
+            name: this.expect.toBeUnlessIE('my operation'),
+            t0: this.expect.toBeAtLeast(t0),
+            queued: this.expect.toBeAtLeast(0),
+            started: this.expect.toBeAtLeast(0),
+            duration: this.expect.toBeAtLeast(0),
+            totalDuration: this.expect.toBeAtLeast(0),
             success: true
         }]);
     });
@@ -458,13 +469,13 @@ describe('Dials', function() {
 
         expect(timeoutId).not.toEqual(null);
 
-        expect(operations).toNearlyEqual([{
-            t0: t0,
-            queued: 0,
-            started: 0,
-            name: 'thing1',
-            duration: 0,
-            totalDuration: 0,
+        expect(operations).toFit([{
+            name: this.expect.toBeUnlessIE('thing1'),
+            t0: this.expect.toBeAtLeast(t0),
+            queued: this.expect.toBeAtLeast(0),
+            started: this.expect.toBeAtLeast(0),
+            duration: this.expect.toBeAtLeast(0),
+            totalDuration: this.expect.toBeAtLeast(0),
             success: true,
             calls: []
         }]);

@@ -1,6 +1,11 @@
 // Karma configuration
 // Generated on Fri Oct 25 2013 18:35:41 GMT+0100 (BST)
 
+var webdriverConfig = {
+  url: '127.0.0.1',
+  port: 4444
+};
+
 module.exports = function(config) {
   config.set({
 
@@ -16,13 +21,9 @@ module.exports = function(config) {
     files: [
       {pattern: 'test-data/*', included: false},
       'lib/*.js',
-      '**/*.js'
-    ],
-
-
-    // list of files to exclude
-    exclude: [
-      'coverage/**'
+      'test/testUtil.js',
+      'dials.js',
+      'test/*Spec.js',
     ],
 
 
@@ -47,7 +48,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
 
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -65,7 +66,7 @@ module.exports = function(config) {
     browsers: [
         'Chrome',
         // 'Firefox',
-        // 'sl_ie7_win',
+        // 'wd_ie7_win',
         // 'sl_ie9_win',
         // 'sl_ie9_win',
         // 'sl_ie10_win'
@@ -73,6 +74,8 @@ module.exports = function(config) {
         // 'sl_safari_osx',
     ],
 
+    // Uncomment this line for Webdriver tests
+    // hostname: '10.0.2.2',
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
@@ -127,6 +130,13 @@ module.exports = function(config) {
         browserName: 'safari',
         platform: 'OS X 10.6',
         version: '5'
+      },
+      wd_ie7_win: {
+        base: 'WebDriver',
+        config: webdriverConfig,
+        browserName: 'internet explorer',
+        version: '7',
+        name: 'IE7 WebDriver'
       }
     }
   });

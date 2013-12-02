@@ -1,41 +1,33 @@
 'use strict';
 
-describe('nearlyEquals', function() {
+describe('toFit', function() {
     beforeEach(function () {
         this.addMatchers({
-            toNearlyEqual: toNearlyEqual
+            toFit: toFit
         });
     });
 
     it('should compare arrays correctly', function() {
-        expect([]).toNearlyEqual([]);
-        expect([1]).toNearlyEqual([1]);
-        expect([{}]).toNearlyEqual([{}]);
-        expect([{k: 1}]).toNearlyEqual([{k: 1}]);
-        expect([[]]).toNearlyEqual([[]]);
-        expect(['test']).toNearlyEqual(['test']);
+        expect([]).toFit([]);
+        expect([1]).toFit([1]);
+        expect([{}]).toFit([{}]);
+        expect([{k: 1}]).toFit([{k: 1}]);
+        expect([[]]).toFit([[]]);
+        expect(['test']).toFit(['test']);
 
-        expect([]).not.toNearlyEqual([1]);
-        expect([1]).not.toNearlyEqual([]);
-        expect([{k: 1}]).not.toNearlyEqual([{k: 1, j: 2}]);
-        expect([{k: 1, j: 1}]).not.toNearlyEqual([{k: 1}]);
-        expect([{k: 5}]).not.toNearlyEqual([{k: 6}]);
-        expect([[]]).not.toNearlyEqual([]);
-        expect([]).not.toNearlyEqual([[]]);
-        expect([5]).not.toNearlyEqual(['test']);
-    });
-
-    it('should compare timestamp fields with delta', function() {
-        expect([{t0: 5}]).toNearlyEqual([{t0: 5}]);
-        expect([{t0: 5}]).toNearlyEqual([{t0: 10}]);
-        expect([{t0: 10}]).toNearlyEqual([{t0: 5}]);
-        expect([{t0: 5}]).not.toNearlyEqual([{t0: 11}]);
-        expect([{t0: 11}]).not.toNearlyEqual([{t0: 5}]);
+        expect([]).not.toFit([1]);
+        expect([1]).not.toFit([]);
+        expect([{k: 1}]).not.toFit([{k: 1, j: 2}]);
+        expect([{k: 1, j: 1}]).not.toFit([{k: 1}]);
+        expect([{k: 5}]).not.toFit([{k: 6}]);
+        expect([[]]).not.toFit([]);
+        expect([]).not.toFit([[]]);
+        expect([5]).not.toFit(['test']);
     });
 
     it('should compare timestamps in nested legs with delta', function() {
-        expect(        [ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 26, success : true, calls : [ { queued : 21, started : 31, name : 'thing2', duration : 6, success : true } ] } ])
-        .toNearlyEqual([ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ]);
+        expect(        [ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ])
+        .toFit([ { t0 : 1382822424880, queued : 0, started : 0, name : 'thing1', totalDuration : 25, success : true, calls : [ { queued : 20, started : 30, name : 'thing2', duration : 5, success : true } ] } ]);
     });
 
     it('should detect missing elements from nested arrays', function() {
@@ -54,7 +46,7 @@ describe('nearlyEquals', function() {
                 duration: 0,
                 success: true
             }]
-        }]).not.toNearlyEqual([{
+        }]).not.toFit([{
             t0: 0,
             name: 'myOp',
             queued: 0,
@@ -139,7 +131,7 @@ describe('deepCopy', function() {
     });
 });
 
-describe('isNearlyEqual assertion failure messages', function() {
+describe('toFit assertion failure messages', function() {
     function MockValue(actual) {
         this.env = jasmine.getEnv();
         this.actual = actual;
@@ -147,7 +139,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for number', function() {
         var mockValue = new MockValue(5);
-        var result = toNearlyEqual.call(mockValue, 4);
+        var result = toFit.call(mockValue, 4);
 
         expect(result).toBeFalsy();
 
@@ -156,7 +148,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for object', function() {
         var mockValue = new MockValue({ a: 5 });
-        var result = toNearlyEqual.call(mockValue, { a: 4 });
+        var result = toFit.call(mockValue, { a: 4 });
 
         expect(result).toBeFalsy();
 
@@ -165,7 +157,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for array', function() {
         var mockValue = new MockValue([5]);
-        var result = toNearlyEqual.call(mockValue, [4]);
+        var result = toFit.call(mockValue, [4]);
 
         expect(result).toBeFalsy();
 
@@ -174,7 +166,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for number compared to object', function() {
         var mockValue = new MockValue(5);
-        var result = toNearlyEqual.call(mockValue, { a: 5 });
+        var result = toFit.call(mockValue, { a: 5 });
 
         expect(result).toBeFalsy();
 
@@ -183,7 +175,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for object compared to number', function() {
         var mockValue = new MockValue({ a : 5 });
-        var result = toNearlyEqual.call(mockValue, 5);
+        var result = toFit.call(mockValue, 5);
 
         expect(result).toBeFalsy();
 
@@ -192,7 +184,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for object compared to null', function() {
         var mockValue = new MockValue({});
-        var result = toNearlyEqual.call(mockValue, null);
+        var result = toFit.call(mockValue, null);
 
         expect(result).toBeFalsy();
 
@@ -201,7 +193,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for null compared to object', function() {
         var mockValue = new MockValue(null);
-        var result = toNearlyEqual.call(mockValue, {});
+        var result = toFit.call(mockValue, {});
 
         expect(result).toBeFalsy();
 
@@ -210,7 +202,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for object compared to array', function() {
         var mockValue = new MockValue({ a : 5 });
-        var result = toNearlyEqual.call(mockValue, [5]);
+        var result = toFit.call(mockValue, [5]);
 
         expect(result).toBeFalsy();
 
@@ -219,7 +211,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for array compared to object', function() {
         var mockValue = new MockValue([5]);
-        var result = toNearlyEqual.call(mockValue, { a : 5 });
+        var result = toFit.call(mockValue, { a : 5 });
 
         expect(result).toBeFalsy();
 
@@ -228,7 +220,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for array compared to number', function() {
         var mockValue = new MockValue([5]);
-        var result = toNearlyEqual.call(mockValue, 5);
+        var result = toFit.call(mockValue, 5);
 
         expect(result).toBeFalsy();
 
@@ -237,7 +229,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for number compared to array', function() {
         var mockValue = new MockValue(5);
-        var result = toNearlyEqual.call(mockValue, [5]);
+        var result = toFit.call(mockValue, [5]);
 
         expect(result).toBeFalsy();
 
@@ -246,7 +238,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for array compared to null', function() {
         var mockValue = new MockValue([]);
-        var result = toNearlyEqual.call(mockValue, null);
+        var result = toFit.call(mockValue, null);
 
         expect(result).toBeFalsy();
 
@@ -255,7 +247,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for null compared to array', function() {
         var mockValue = new MockValue(null);
-        var result = toNearlyEqual.call(mockValue, []);
+        var result = toFit.call(mockValue, []);
 
         expect(result).toBeFalsy();
 
@@ -264,7 +256,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for number compared to null', function() {
         var mockValue = new MockValue(5);
-        var result = toNearlyEqual.call(mockValue, null);
+        var result = toFit.call(mockValue, null);
 
         expect(result).toBeFalsy();
 
@@ -273,7 +265,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for null compared to number', function() {
         var mockValue = new MockValue(null);
-        var result = toNearlyEqual.call(mockValue, 5);
+        var result = toFit.call(mockValue, 5);
 
         expect(result).toBeFalsy();
 
@@ -282,7 +274,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for object containing wrong type of element', function() {
         var mockValue = new MockValue({a: [5]});
-        var result = toNearlyEqual.call(mockValue, {a: {b: 5}});
+        var result = toFit.call(mockValue, {a: {b: 5}});
 
         expect(result).toBeFalsy();
 
@@ -291,7 +283,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for array containing wrong type of element', function() {
         var mockValue = new MockValue([{a: 5}]);
-        var result = toNearlyEqual.call(mockValue, [5]);
+        var result = toFit.call(mockValue, [5]);
 
         expect(result).toBeFalsy();
 
@@ -310,7 +302,7 @@ describe('isNearlyEqual assertion failure messages', function() {
             ],
             e: null
         });
-        var result = toNearlyEqual.call(mockValue, {
+        var result = toFit.call(mockValue, {
             a: [
                 {
                     b: [5, 6],
@@ -342,7 +334,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for unexpected object key', function() {
         var mockValue = new MockValue({a: 4});
-        var result = toNearlyEqual.call(mockValue, {});
+        var result = toFit.call(mockValue, {});
 
         expect(result).toBeFalsy();
 
@@ -351,7 +343,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for missing object key', function() {
         var mockValue = new MockValue({});
-        var result = toNearlyEqual.call(mockValue, {a: 4});
+        var result = toFit.call(mockValue, {a: 4});
 
         expect(result).toBeFalsy();
 
@@ -360,7 +352,7 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for unexpected array element', function() {
         var mockValue = new MockValue([4, 5]);
-        var result = toNearlyEqual.call(mockValue, [4]);
+        var result = toFit.call(mockValue, [4]);
 
         expect(result).toBeFalsy();
 
@@ -369,20 +361,11 @@ describe('isNearlyEqual assertion failure messages', function() {
 
     it('should give correct message for missing array element', function() {
         var mockValue = new MockValue([4]);
-        var result = toNearlyEqual.call(mockValue, [4, 5]);
+        var result = toFit.call(mockValue, [4, 5]);
 
         expect(result).toBeFalsy();
 
         expect(mockValue.message()[0]).toBe('[\n 4\n\t\texpected 5 (missing element)');
-    });
-
-    it('should give correct message for delta match', function() {
-        var mockValue = new MockValue({t0: 123});
-        var result = toNearlyEqual.call(mockValue, {t0: 456});
-
-        expect(result).toBeFalsy();
-
-        expect(mockValue.message()[0]).toBe('{\n t0: 123\t\texpected ~456');
     });
 });
 
@@ -394,7 +377,7 @@ function mockTest(f) {
     describe('mock suite', function() {
         spec = it('mock spec', f);
     });
-    installNearlyEquals(spec);
+    installMatchers(spec);
     spec.execute();
 
     var result = spec.results();
@@ -404,14 +387,14 @@ function mockTest(f) {
 
 describe('embedded object matchers', function() {
     beforeEach(function() {
-        installNearlyEquals(this);
+        installMatchers(this);
     });
 
     it('should pass for correct assertion on object property', function() {
         var result = mockTest(function() {
             expect({
                 a: 5
-            }).toNearlyEqual({
+            }).toFit({
                 a: this.expect.toBe(5)
             });
         });
@@ -423,7 +406,7 @@ describe('embedded object matchers', function() {
         var result = mockTest(function() {
             expect({
                 a: 5
-            }).toNearlyEqual({
+            }).toFit({
                 a: this.expect.toBe(6)
             });
         });
@@ -435,7 +418,7 @@ describe('embedded object matchers', function() {
         var result = mockTest(function() {
             expect([
                 5
-            ]).toNearlyEqual([
+            ]).toFit([
                 this.expect.toBe(5)
             ]);
         });
@@ -447,7 +430,7 @@ describe('embedded object matchers', function() {
         var result = mockTest(function() {
             expect([
                 5
-            ]).toNearlyEqual([
+            ]).toFit([
                 this.expect.toBe(6)
             ]);
         });
@@ -459,7 +442,7 @@ describe('embedded object matchers', function() {
         var result = mockTest(function() {
             expect({
                 a: 5
-            }).toNearlyEqual({
+            }).toFit({
                 a: this.expect.toEqual(6)
             });
         });
@@ -471,7 +454,7 @@ describe('embedded object matchers', function() {
         var result = mockTest(function() {
             expect({
                 a: 5
-            }).toNearlyEqual({
+            }).toFit({
                 a: this.expect.not.toEqual(6)
             });
         });
@@ -483,7 +466,7 @@ describe('embedded object matchers', function() {
         var result = mockTest(function() {
             expect({
                 a: 5
-            }).toNearlyEqual({
+            }).toFit({
                 a: this.expect.not.toEqual(5)
             });
         });
@@ -494,7 +477,7 @@ describe('embedded object matchers', function() {
     it('should run without throwing', function() {
         expect({
             a: 5
-        }).toNearlyEqual({
+        }).toFit({
             a: this.expect.toBe(5)
         });
     });

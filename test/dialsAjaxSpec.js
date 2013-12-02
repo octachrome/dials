@@ -11,8 +11,19 @@ describe('Dials-Ajax', function() {
         });
 
         this.addMatchers({
-            toNearlyEqual: toNearlyEqual
+            toBeAtLeast: function(expected) {
+                return this.actual >= expected;
+            },
+
+            /**
+             * An equality test which is ignored for IE browsers (IE does not support the Function.name property),
+             */
+            toBeUnlessIE: function(expected) {
+                return this.actual == expected || isIE();
+            }
         });
+
+        installMatchers(this);
     });
 
     it('should not record Ajax.Requests outside of tracked functions', function() {
@@ -60,33 +71,33 @@ describe('Dials-Ajax', function() {
         runs(function() {
             expect(/{"test":true}/.match(json)).toBe(true);
 
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                name: 'myOp',
-                queued: 0,
-                started: 0,
-                duration: 0,
-                totalDuration: '*',
+            expect(operations).toFit([{
+                t0: this.expect.toBeAtLeast(t0),
+                name: this.expect.toBeUnlessIE('myOp'),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(5),
                 success: true,
                 calls: [{
                     cause: 'timeout',   // a timeout set by prototype.js internally
-                    queued: 0,
-                    started: '*',
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 },
                 {
                     cause: 'ajax:base/test-data/test.json',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true,
                     calls: [{
                         cause: 'timeout',
-                        name: 'nested',
-                        queued: '*',
-                        started: '*',
-                        duration: 0,
+                        name: this.expect.toBeUnlessIE('nested'),
+                        queued: this.expect.toBeAtLeast(0),
+                        started: this.expect.toBeAtLeast(0),
+                        duration: this.expect.toBeAtLeast(0),
                         success: true
                     }]
                 }]
@@ -119,32 +130,32 @@ describe('Dials-Ajax', function() {
         }, 'Ajax request should have failed');
 
         runs(function() {
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                name: 'myOp',
-                queued: 0,
-                started: 0,
-                duration: 0,
-                totalDuration: '*',
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('myOp'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(5),
                 success: true,
                 calls: [{
                     cause: 'timeout',   // a timeout set by prototype.js internally
-                    queued: 0,
-                    started: '*',
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 },{
                     cause: 'ajax:base/missing.json',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: this.expect.toBeAtLeast(0),
                     success: true,
                     calls: [{
                         cause: 'timeout',
-                        name: 'nested',
-                        queued: '*',
-                        started: '*',
-                        duration: 0,
+                        name: this.expect.toBeUnlessIE('nested'),
+                        queued: this.expect.toBeAtLeast(5),
+                        started: this.expect.toBeAtLeast(5),
+                        duration: this.expect.toBeAtLeast(0),
                         success: true
                     }]
                 }]
@@ -172,26 +183,26 @@ describe('Dials-Ajax', function() {
         }, 'Ajax request should have completed');
 
         runs(function() {
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                name: 'myOp',
-                queued: 0,
-                started: 0,
-                duration: 0,
-                totalDuration: '*',
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('myOp'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(5),
                 success: true,
                 calls: [{
                     cause: 'timeout',   // a timeout set by prototype.js internally
-                    queued: 0,
-                    started: '*',
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 },
                 {
                     cause: 'ajax:base/missing.json',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 }]
             }]);
@@ -231,41 +242,41 @@ describe('Dials-Ajax', function() {
         runs(function() {
             expect(failed).toBe(true);
 
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                name: 'myOp',
-                queued: 0,
-                started: 0,
-                duration: 0,
-                totalDuration: '*',
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('myOp'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(5),
                 success: true,
                 calls: [{
                     cause: 'timeout',   // a timeout set by prototype.js internally
-                    queued: 0,
-                    started: '*',
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),
+                    duration: this.expect.toBeAtLeast(0),
                     success: true
                 },
                 {
                     cause: 'ajax:base/missing.json',
-                    queued: 0,
-                    started: '*',   // takes anywhere between 5ms and 300ms to complete the request
-                    duration: 0,
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: this.expect.toBeAtLeast(0),
                     success: true,
                     calls: [                    {
                         cause: 'timeout',
-                        name: 'failure',
-                        queued: '*',
-                        started: '*',
-                        duration: 0,
+                        name: this.expect.toBeUnlessIE('failure'),
+                        queued: this.expect.toBeAtLeast(5),
+                        started: this.expect.toBeAtLeast(5),
+                        duration: this.expect.toBeAtLeast(0),
                         success: true
                     },
                     {
                         cause: 'timeout',
-                        name: 'completion',
-                        queued: '*',
-                        started: '*',
-                        duration: 0,
+                        name: this.expect.toBeUnlessIE('completion'),
+                        queued: this.expect.toBeAtLeast(5),
+                        started: this.expect.toBeAtLeast(5),
+                        duration: this.expect.toBeAtLeast(0),
                         success: true
                     }]
                 }]
@@ -327,19 +338,19 @@ describe('Dials-Ajax', function() {
         runs(function() {
             expect(window.test2).toBe(true);
 
-            expect(operations).toNearlyEqual([{
-                t0: t0,
-                name: 'someOp',
-                queued: 0,
-                started: 0,
-                duration: 0,
-                totalDuration: '*',
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('someOp'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(0),
                 success: true,
                 calls: [{
-                    name: 'onSuccess',
-                    queued : 0,
-                    started : '*',
-                    duration : 0,
+                    name: this.expect.toBeUnlessIE('onSuccess'),
+                    queued : this.expect.toBeAtLeast(0),
+                    started : this.expect.toBeAtLeast(0),
+                    duration : this.expect.toBeAtLeast(0),
                     success : true
                 }]
             }]);
