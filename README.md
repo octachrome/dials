@@ -84,18 +84,15 @@ Now the callback will be invoked as soon as `f` completes, without waiting for `
 
 ## Extending Dials
 
-Dials currently detects timeouts installed using the `setTimeout` function, and asynchronous Ajax calls initiated using XMLHttpRequest. The latter is currently unsupported in IE7 or earlier. You can add support for other asynchronous operations using the `Dials.fork` function. This example defines a simplistic method which uses a dynamic script tag to implement cross-domain AJAX requests:
+Dials currently detects timeouts installed using the `setTimeout` function, and asynchronous Ajax calls initiated using XMLHttpRequest. The latter is currently unsupported in IE7 or earlier. You can add support for other asynchronous operations using the `Dials.wrap` function. This example defines a simplistic method which uses a dynamic script tag to implement cross-domain AJAX requests:
 
     function ajaxCall(url, callback) {
-        // The anonymous function below will be invoked immediately
-        Dials.fork(function (wrap) {
-            var script = document.createElement('script');
-            script.src = url;
-            // Calling 'wrap' causes Dials to wait until this callback has been invoked before it will consider the
-            // outer operation to be complete. The second parameter will be recorded in the 'cause' property.
-            script.onload = wrap(callback, 'ajax:' + url);
-            document.body.appendChild(script);
-        });
+        var script = document.createElement('script');
+        script.src = url;
+        // Calling 'wrap' causes Dials to wait until this callback has been invoked before it will consider the
+        // outer operation to be complete. The second parameter will be recorded in the 'cause' property.
+        script.onload = Dials.wrap(callback, 'ajax:' + url);
+        document.body.appendChild(script);
     }
 
 If this function is called from a `Dials.tracked` function, it will make sure the callback forms part of the operation that gets recorded. Calling the function from a normal JavaScript function will not do anything: the wrap function just returns the unmodified callback.

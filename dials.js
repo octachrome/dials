@@ -146,66 +146,55 @@
     }
 
     /**
-     * Queue an asynchronous function call which should be linked to the current operation. The given function will
-     * be invoked immediately with a single argument: a function which should be used to decorate any callbacks that
-     * should be tracked as part of the current operation.
+     * Wraps a callback with the code to re-enter the operation. The first call to the wrapped callback completes
+     * the operation (unless the callback registers any more async calls). If you want to call the callback several
+     * times, you need to rewrap it.
+     * @param cb {function} the callback to wrap
+     * @param cause {string} a description of what triggered the callback
+     * @return {function} a wrapped callback
      */
-    function fork(fn) {
+    function wrap(cb, cause) {
         if (currentRoot) {
             var root = currentRoot;
             var parentLeg = currentLeg;
 
-            /**
-             * Wraps a callback with the code to re-enter the operation. The first to the wrapped callback completes
-             * the operation (unless the callback registers any more async calls). If you want to call the callback
-             * several times, you need to rewrap it.
-             * @param cb {function} the callback to wrap
-             * @param cause {string} a description of what triggered the callback
-             * @return {function} a wrapped callback
-             */
-            var wrap = function wrap(cb, cause) {
-                var leg = {
-                    queued: now() - root.t0,
-                    stackTrace: new Error().stack
-                };
-                if (cb.name) {
-                    leg.name = cb.name;
-                }
-                if (cause) {
-                    leg.cause = cause;
-                }
-                parentLeg.calls = parentLeg.calls || [];
-                parentLeg.calls.push(leg);
-
-                var legId = nextId();
-
-                abortFunctions[legId] = function abort() {
-                    var idx = indexOf(parentLeg.calls, leg);
-                    if (idx >= 0) {
-                        parentLeg.calls.splice(idx, 1);
-                    }
-                };
-
-                var wrapped = function wrapped() {
-                    var args = Array.prototype.slice.call(arguments, 0);
-                    try {
-                        return invoke(this, cb, root, leg, args);
-                    } finally {
-                        delete abortFunctions[legId];
-                    }
-                };
-
-                wrapped.legId = legId;
-
-                return wrapped;
+            var leg = {
+                queued: now() - root.t0,
+                stackTrace: new Error().stack
+            };
+            if (cb.name) {
+                leg.name = cb.name;
             }
+            if (cause) {
+                leg.cause = cause;
+            }
+            parentLeg.calls = parentLeg.calls || [];
+            parentLeg.calls.push(leg);
+
+            var legId = nextId();
+
+            abortFunctions[legId] = function abort() {
+                var idx = indexOf(parentLeg.calls, leg);
+                if (idx >= 0) {
+                    parentLeg.calls.splice(idx, 1);
+                }
+            };
+
+            var wrapped = function wrapped() {
+                var args = Array.prototype.slice.call(arguments, 0);
+                try {
+                    return invoke(this, cb, root, leg, args);
+                } finally {
+                    delete abortFunctions[legId];
+                }
+            };
+
+            wrapped.legId = legId;
+
+            return wrapped;
         } else {
-            wrap = function identity(cb) {
-                return cb;
-            }
+            return cb;
         }
-
-        return fn(wrap);
     }
 
     /**
@@ -225,14 +214,12 @@
     var plainTimeout = env.setTimeout;
     env.setTimeout = function Dials_setTimeout() {
         var args = Array.prototype.slice.call(arguments, 0);
-        return fork(function(wrap) {
-            // 1st argument is the callback function
-            args[0] = wrap(args[0], 'timeout');
-            var legId = args[0].legId;
-            var timeoutId = plainTimeout.apply(null, args);
-            timeoutLegs[timeoutId] = legId;
-            return timeoutId;
-        });
+        // 1st argument is the callback function
+        args[0] = wrap(args[0], 'timeout');
+        var legId = args[0].legId;
+        var timeoutId = plainTimeout.apply(null, args);
+        timeoutLegs[timeoutId] = legId;
+        return timeoutId;
     };
 
     var plainClearTimeout = env.clearTimeout;
@@ -257,24 +244,21 @@
             var args = Array.prototype.slice.call(arguments, 0);
             var thisObj = this;
             var url = this.Dials_url;
+            var cause = 'ajax:' + url;
 
-            return fork(function(wrap) {
-                var cause = 'ajax:' + url;
+            if (thisObj.onreadystatechange) {
+                var plain = thisObj.onreadystatechange;
+                var wrapped = wrap(thisObj.onreadystatechange, cause);
+                thisObj.onreadystatechange = function() {
+                    if (thisObj.readyState == 4) {
+                        return wrapped();
+                    } else {
+                        return plain();
+                    }
+                };
+            }
 
-                if (thisObj.onreadystatechange) {
-                    var plain = thisObj.onreadystatechange;
-                    var wrapped = wrap(thisObj.onreadystatechange, cause);
-                    thisObj.onreadystatechange = function() {
-                        if (thisObj.readyState == 4) {
-                            return wrapped();
-                        } else {
-                            return plain();
-                        }
-                    };
-                }
-
-                return plainSend.apply(thisObj, args);
-            });
+            return plainSend.apply(thisObj, args);
         };
     }
 
@@ -308,10 +292,9 @@
         },
 
         /**
-         * Invoke the given function, passing in another function which can be used to wrap any callbacks such that
-         * they form part of the current operation, if one is defined.
+         * @see wrap, above.
          */
-        fork: fork,
+        wrap: wrap,
 
         /**
          * Invoke the given function and ignore any asynchronous calls queued by it (they will not be tracked as part

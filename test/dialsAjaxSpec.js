@@ -285,19 +285,17 @@ describe('Dials-Ajax', function() {
     });
 
     function loadScript(url, onSuccess) {
-        Dials.fork(function(wrap) {
-            var script = document.createElement('script');
-            var wrapped = wrap(onSuccess);
-            script.onreadystatechange = function() {
-                if (this.readyState == 'complete') {
-                    wrapped();
-                }
-            };
-            script.onload = wrapped();
-            script.src = url;
-            var head = document.getElementsByTagName('head')[0];
-            head.appendChild(script);
-        });
+        var script = document.createElement('script');
+        var wrapped = Dials.wrap(onSuccess);
+        script.onreadystatechange = function() {
+            if (this.readyState == 'complete') {
+                wrapped();
+            }
+        };
+        script.onload = wrapped();
+        script.src = url;
+        var head = document.getElementsByTagName('head')[0];
+        head.appendChild(script);
     }
 
     it('should ignore custom asynchronous callbacks outside a defined operation', function() {

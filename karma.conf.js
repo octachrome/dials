@@ -67,7 +67,7 @@ module.exports = function(config) {
         'Chrome',
         // 'Firefox',
         // 'wd_ie7_win',
-        // 'sl_ie9_win',
+        // 'sl_ie8_win',
         // 'sl_ie9_win',
         // 'sl_ie10_win'
         // 'sl_ie11_win',

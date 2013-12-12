@@ -12,6 +12,10 @@ describe('Dials', function() {
 
         this.addMatchers({
             toBeAtLeast: function(expected) {
+                if (isIE()) {
+                    // O IE how we love you
+                    expected = expected > 5 ? expected - 5 : 0;
+                }
                 return this.actual >= expected;
             },
 
@@ -310,10 +314,8 @@ describe('Dials', function() {
 
     it('should ignore custom synchronous callbacks outside a defined operation', function() {
         function asyncCall(x, onSuccess) {
-            Dials.fork(function(wrap) {
-                onSuccess = wrap(onSuccess);
-                onSuccess(x);
-            });
+            onSuccess = Dials.wrap(onSuccess);
+            onSuccess(x);
         }
 
         var result;
@@ -327,10 +329,8 @@ describe('Dials', function() {
 
     it('should record custom synchronous callbacks within a defined operation', function() {
         function asyncCall(x, onSuccess) {
-            Dials.fork(function(wrap) {
-                onSuccess = wrap(onSuccess);
-                onSuccess(x);
-            });
+            onSuccess = Dials.wrap(onSuccess);
+            onSuccess(x);
         }
 
         var result;
@@ -364,10 +364,8 @@ describe('Dials', function() {
 
     it('should record custom synchronous callbacks which throw', function() {
         function asyncCall(x, onSuccess) {
-            Dials.fork(function(wrap) {
-                onSuccess = wrap(onSuccess);
-                onSuccess(x);
-            });
+            onSuccess = Dials.wrap(onSuccess);
+            onSuccess(x);
         }
 
         var result;
@@ -404,10 +402,8 @@ describe('Dials', function() {
 
     it('should pass through the return values of callbacks', function() {
         function asyncCall(x, onSuccess) {
-            return Dials.fork(function(wrap) {
-                onSuccess = wrap(onSuccess);
-                return onSuccess(x);
-            });
+            onSuccess = Dials.wrap(onSuccess);
+            return onSuccess(x);
         }
 
         var result;
