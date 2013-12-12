@@ -1,4 +1,11 @@
-xdescribe('xhr-poc', function() {
+describe('xhr-poc', function() {
+    it('should find out about XHR', function() {
+        var xhr = new XMLHttpRequest();
+        for (var key in xhr) {
+            console.log(key + ':' + xhr[key]);
+        }
+    });
+
     it('should override XHR', function() {
         var oldXHR = XMLHttpRequest;
         XMLHttpRequest = function() {
@@ -17,15 +24,13 @@ xdescribe('xhr-poc', function() {
 
         var x = new oldXHR();
         x.onreadystatechange = function() {
-            console.log(this.readyState);
+            console.log(x.readyState);
         }
         x.open('GET', 'base/test-data/test.json', true);
         console.log('here2');
         x.send();
         console.log('here3');
 
-        waitsFor(function() {
-            return false;
-        });
+        waits(1000);
     });
 });

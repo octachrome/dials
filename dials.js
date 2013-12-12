@@ -331,4 +331,33 @@
             }
         }
     };
+
+    function XhrProxy() {
+        var xhr = new XMLHttpRequest();
+        var thisObj = this;
+
+        xhr.onreadystatechange = function() {
+            thisObj.readyState = xhr.readyState;
+            thisObj.responseText = xhr.responseText;
+            if (thisObj.onreadystatechange) {
+                thisObj.onreadystatechange.apply(this, arguments);
+            }
+        };
+
+        this._xhr = xhr;
+    }
+
+    XhrProxy.prototype = {
+        open: function open() {
+            this._xhr.open.apply(this._xhr, arguments);
+        },
+
+        send: function send() {
+            this._xhr.send.apply(this._xhr, arguments);
+        }
+    };
+
+    if (env.jasmine) {
+        env.XhrProxy = XhrProxy;
+    }
 }(this));
