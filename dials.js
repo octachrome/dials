@@ -338,22 +338,29 @@
 
         xhr.onreadystatechange = function() {
             thisObj.readyState = xhr.readyState;
-            thisObj.responseText = xhr.responseText;
+            if (xhr.readyState == 4) {
+                thisObj.responseText = xhr.responseText;
+            }
             if (thisObj.onreadystatechange) {
                 thisObj.onreadystatechange.apply(this, arguments);
             }
         };
 
         this._xhr = xhr;
+        this.readyState = 0;
     }
 
     XhrProxy.prototype = {
-        open: function open() {
-            this._xhr.open.apply(this._xhr, arguments);
+        open: function open(method, url, async, user, password) {
+            this._xhr.open(method, url, async, user, password);
         },
 
-        send: function send() {
-            this._xhr.send.apply(this._xhr, arguments);
+        send: function send(body) {
+            this._xhr.send(body);
+        },
+
+        abort: function send(body) {
+            this._xhr.abort(body);
         }
     };
 
