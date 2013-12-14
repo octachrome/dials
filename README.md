@@ -84,7 +84,7 @@ Now the callback will be invoked as soon as `f` completes, without waiting for `
 
 ## Extending Dials
 
-Dials currently detects timeouts installed using the `setTimeout` function, and asynchronous Ajax calls initiated using XMLHttpRequest. The latter is currently unsupported in IE7 or earlier. You can add support for other asynchronous operations using the `Dials.wrap` function. This example defines a simplistic method which uses a dynamic script tag to implement cross-domain AJAX requests:
+Dials currently detects timeouts installed using the `setTimeout` function, and asynchronous Ajax calls initiated using XMLHttpRequest. You can add support for other asynchronous operations using the `Dials.wrap` function. This example defines a simplistic method which uses a dynamic script tag to implement cross-domain AJAX requests:
 
     function ajaxCall(url, callback) {
         var script = document.createElement('script');
@@ -96,3 +96,7 @@ Dials currently detects timeouts installed using the `setTimeout` function, and 
     }
 
 If this function is called from a `Dials.tracked` function, it will make sure the callback forms part of the operation that gets recorded. Calling the function from a normal JavaScript function will not do anything: the wrap function just returns the unmodified callback.
+
+## Limitations
+
+Under IE7 there is basic support for Ajax call tracking, but this is a work in progress. In all browsers, a call to onreadystatechange only completes the operation when readyState reaches 4. Aborted Ajax requests may not work correctly on all browsers yet.
