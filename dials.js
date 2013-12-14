@@ -1,6 +1,49 @@
 'use strict';
 
 (function(env) {
+    var plainXhr = XMLHttpRequest;
+
+    /**
+     * Proxies XMLHttpRequest so that we can override some of its methods. Only used in browsers
+     * which do not allow XMLHttpRequest.prototype to be modified directly (IE7).
+     */
+    function XhrProxy() {
+        var xhr = new plainXhr();
+        var thisObj = this;
+
+        xhr.onreadystatechange = function() {
+            thisObj.readyState = xhr.readyState;
+            if (xhr.readyState == 4) {
+                thisObj.responseText = xhr.responseText;
+                thisObj.status = xhr.status;
+            }
+            if (thisObj.onreadystatechange) {
+                thisObj.onreadystatechange.apply(this, arguments);
+            }
+        };
+
+        this._xhr = xhr;
+        this.readyState = 0;
+    }
+
+    XhrProxy.prototype = {
+        open: function open(method, url, async, user, password) {
+            this._xhr.open(method, url, async, user, password);
+        },
+
+        send: function send(body) {
+            this._xhr.send(body);
+        },
+
+        abort: function send(body) {
+            this._xhr.abort(body);
+        },
+
+        setRequestHeader: function setRequestHeader(header, value) {
+            this._xhr.setRequestHeader(header, value);
+        }
+    };
+
     /**
      * The listener function to call when an operation completes. Should add support for several listeners at some
      * point.
@@ -232,7 +275,13 @@
         }
     };
 
-    if (typeof XMLHttpRequest != 'undefined' && XMLHttpRequest.prototype) {
+    if (typeof XMLHttpRequest != 'undefined') {
+        if (!XMLHttpRequest.prototype) {
+            // In IE7 and possibly other old browsers, we have to proxy XMLHttpRequest in order to
+            // override the open and send methods.
+            XMLHttpRequest = XhrProxy;
+        }
+
         var plainOpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function Dials_XMLHttpRequest_open() {
             this.Dials_url = arguments[1];
@@ -329,38 +378,6 @@
             for (var i = 0; i < activeOps.length; i++) {
                 console.log(JSON.stringify(activeOps[i]));
             }
-        }
-    };
-
-    function XhrProxy() {
-        var xhr = new XMLHttpRequest();
-        var thisObj = this;
-
-        xhr.onreadystatechange = function() {
-            thisObj.readyState = xhr.readyState;
-            if (xhr.readyState == 4) {
-                thisObj.responseText = xhr.responseText;
-            }
-            if (thisObj.onreadystatechange) {
-                thisObj.onreadystatechange.apply(this, arguments);
-            }
-        };
-
-        this._xhr = xhr;
-        this.readyState = 0;
-    }
-
-    XhrProxy.prototype = {
-        open: function open(method, url, async, user, password) {
-            this._xhr.open(method, url, async, user, password);
-        },
-
-        send: function send(body) {
-            this._xhr.send(body);
-        },
-
-        abort: function send(body) {
-            this._xhr.abort(body);
         }
     };
 

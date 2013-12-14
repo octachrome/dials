@@ -106,7 +106,7 @@ describe('Dials-Ajax', function() {
     });
 
     it('should record failing Ajax.Requests within tracked functions', function() {
-        var failed;
+        var status;
 
         var f = Dials.tracked(function myOp() {
             new Ajax.Request('base/missing.json', {
@@ -114,9 +114,11 @@ describe('Dials-Ajax', function() {
                 onSuccess: function onSuccess() {
                     // do nothing
                 },
-                onFailure: function onFailure() {
+                onFailure: function onFailure(transport) {
+                    var s = transport.status;
+
                     setTimeout(function nested() {
-                        failed = true;
+                        status = s;
                     }, 1);
                 }
             });
@@ -126,10 +128,12 @@ describe('Dials-Ajax', function() {
         f();
 
         waitsFor(function() {
-            return failed;
-        }, 'Ajax request should have failed');
+            return status;
+        }, 'Ajax request should have failed', 1000);
 
         runs(function() {
+            expect(status).toBe(404);
+
             expect(operations).toFit([{
                 name: this.expect.toBeUnlessIE('myOp'),
                 t0: this.expect.toBeAtLeast(t0),
@@ -180,7 +184,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return complete;
-        }, 'Ajax request should have completed');
+        }, 'Ajax request should have completed', 1000);
 
         runs(function() {
             expect(operations).toFit([{
@@ -237,7 +241,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return failed && complete;
-        }, 'Ajax request should have completed');
+        }, 'Ajax request should have completed', 1000);
 
         runs(function() {
             expect(failed).toBe(true);
@@ -308,7 +312,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return done && window.test1;
-        }, 'Should load script');
+        }, 'Should load script', 1000);
 
         runs(function() {
             expect(window.test1).toBe(true);
@@ -331,7 +335,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return done && window.test2;
-        }, 'Should load script');
+        }, 'Should load script', 1000);
 
         runs(function() {
             expect(window.test2).toBe(true);
