@@ -129,7 +129,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return status;
-        }, 'Ajax request should have failed', 1000);
+        }, 'Ajax request should fail', 1000);
 
         runs(function() {
             expect(status).toBe(404);
@@ -167,6 +167,67 @@ describe('Dials-Ajax', function() {
         });
     });
 
+    it('should record failing cross-origin Ajax.Requests within tracked functions', function() {
+        var status = null;
+
+        var f = Dials.tracked(function myOp() {
+            new Ajax.Request('http://surelythisdomaindoesnotexist.com', {
+                method: 'get',
+                onComplete: function onComplete(transport) {
+                    status = transport.status;
+                }
+            });
+        });
+
+        var t0 = now();
+        f();
+
+        if (isIE()) {
+            // IE doesn't get as far as wrapping the callback, so the operation gets completed.
+            expect(operations).toFit([{
+                t0: this.expect.toBeAtLeast(t0),
+                name: null,
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(0),
+                success: true
+            }]);
+            return;
+        }
+
+        waitsFor(function() {
+            return status != null;
+        }, 'Ajax request should complete', 1000);
+
+        runs(function() {
+            expect(status).toBe(0);
+
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('myOp'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(5),
+                success: true,
+                calls: [{
+                    cause: 'timeout',   // a timeout set by prototype.js internally
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),
+                    duration: this.expect.toBeAtLeast(0),
+                    success: true
+                },{
+                    cause: 'ajax:http://surelythisdomaindoesnotexist.com',
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(5),   // takes anywhere between 5ms and 300ms to complete the request
+                    duration: this.expect.toBeAtLeast(0),
+                    success: true
+                }]
+            }]);
+        });
+    });
+
     it('should record completion of Ajax.Requests within tracked functions', function() {
         var complete;
 
@@ -184,7 +245,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return complete;
-        }, 'Ajax request should have completed', 1000);
+        }, 'Ajax request should complete', 1000);
 
         runs(function() {
             expect(operations).toFit([{
@@ -241,7 +302,7 @@ describe('Dials-Ajax', function() {
 
         waitsFor(function() {
             return failed && complete;
-        }, 'Ajax request should have completed', 1000);
+        }, 'Ajax request should complete', 1000);
 
         runs(function() {
             expect(failed).toBe(true);
