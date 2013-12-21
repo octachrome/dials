@@ -16,6 +16,7 @@
             if (xhr.readyState == 4) {
                 thisObj.responseText = xhr.responseText;
                 thisObj.status = xhr.status;
+                thisObj.statusText = xhr.statusText;
             }
             if (thisObj.onreadystatechange) {
                 thisObj.onreadystatechange.apply(this, arguments);

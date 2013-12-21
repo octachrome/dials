@@ -6,6 +6,18 @@ var webdriverConfig = {
   port: 4444
 };
 
+var ipAddress = '127.0.0.1';
+
+var os = require('os');
+var ifaces = os.networkInterfaces();
+for (var dev in ifaces) {
+  ifaces[dev].forEach(function(details) {
+    if (details.family == 'IPv4' && details.address != '127.0.0.1') {
+      ipAddress = details.address;
+    }
+  });
+}
+
 module.exports = function(config) {
   config.set({
 
@@ -74,8 +86,7 @@ module.exports = function(config) {
         // 'sl_safari_osx',
     ],
 
-    // Uncomment this line for Webdriver tests
-    // hostname: '10.0.2.2',
+    hostname: ipAddress,
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
