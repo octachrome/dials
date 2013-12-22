@@ -1,6 +1,7 @@
 // Karma configuration
 // Generated on Fri Oct 25 2013 18:35:41 GMT+0100 (BST)
 
+// Port 4444 must be forwarded to Selenium on the virtual machine
 var webdriverConfig = {
   url: '127.0.0.1',
   port: 4444
@@ -17,6 +18,14 @@ for (var dev in ifaces) {
     }
   });
 }
+
+// Create a web server for testing XHR.setRequestHeader (see dialsAjaxSpec.js)
+var http = require('http');
+http.createServer(function(req, res) {
+  var test = req.headers['x-header-test'];
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end(test);
+}).listen(12345);
 
 module.exports = function(config) {
   config.set({
@@ -48,6 +57,11 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
     reporters: ['progress', 'coverage'],
+
+
+    proxies: {
+      '/header-test': 'http://localhost:12345'
+    },
 
 
     // web server port

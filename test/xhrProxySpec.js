@@ -6,10 +6,9 @@ describe('xhr proxy', function() {
     });
 
     it('should complete a normal AJAX request', function() {
-        var status, statusText, responseText, contentType, connection, headers;
+        var status, statusText, responseText, contentType, headers;
 
         xhr.open('GET', 'base/test-data/test.json', true);
-        xhr.setRequestHeader('Connection', 'close');
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
@@ -17,7 +16,6 @@ describe('xhr proxy', function() {
                 statusText = xhr.statusText;
                 responseText = xhr.responseText;
                 contentType = xhr.getResponseHeader('Content-Type');
-                connection = xhr.getResponseHeader('Connection');
                 headers = xhr.getAllResponseHeaders();
             }
         };
@@ -33,8 +31,30 @@ describe('xhr proxy', function() {
             expect(statusText).toBe('OK');
             expect(/{"test":true}/.match(responseText)).toBeTruthy();
             expect(contentType).toBe('application/json');
-            expect(connection).toBe('close');
-            expect(/Connection: close/m.match(headers)).toBeTruthy();
+            expect(/Content-Type: application\/json/m.match(headers)).toBeTruthy();
+        });
+    });
+
+    it('should be able to set headers', function() {
+        var responseText;
+
+        xhr.open('GET', 'header-test', true);
+        xhr.setRequestHeader('X-Header-Test', 'Abc');
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                responseText = xhr.responseText;
+            }
+        };
+
+        xhr.send();
+
+        waitsFor(function() {
+            return responseText;
+        });
+
+        runs(function() {
+            expect(responseText).toBe('Abc');
         });
     });
 

@@ -453,8 +453,8 @@ describe('Dials-Ajax', function() {
     it('should record aborted Ajax requests', function() {
         var done;
 
-        var f = Dials.tracked(function() {
-            xhr = new XMLHttpRequest();
+        var f = Dials.tracked(function myOp() {
+            var xhr = new XMLHttpRequest();
 
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
