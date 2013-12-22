@@ -6,47 +6,68 @@ describe('xhr proxy', function() {
     });
 
     it('should complete a normal AJAX request', function() {
-        var status, statusText, json;
+        var status, statusText, responseText;
 
         xhr.open('get', 'base/test-data/test.json', true);
 
         xhr.onreadystatechange = function() {
-            if (xhr.readyState = 4) {
+            if (xhr.readyState == 4) {
                 status = xhr.status;
                 statusText = xhr.statusText;
-                json = xhr.responseText;
+                responseText = xhr.responseText;
             }
         };
 
         xhr.send();
 
         waitsFor(function() {
-            return json;
+            return status != null;
         });
 
         runs(function() {
             expect(status).toBe(200);
             expect(statusText).toBe('OK');
-            expect(/{"test":true}/.match(json)).toBe(true);
+            expect(/{"test":true}/.match(responseText)).toBe(true);
         });
     });
 
-    it('should abort an AJAX request', function() {
-        var status, statusText, json;
+    it('should populate responseXML', function() {
+        var responseXML;
 
-        xhr.open('get', 'base/test-data/test.json', true);
+        xhr.open('get', 'base/test-data/test.xml', true);
 
         xhr.onreadystatechange = function() {
-            if (xhr.readyState = 4) {
-                status = xhr.status;
-                statusText = xhr.statusText;
-                json = xhr.responseText;
+            if (xhr.readyState == 4) {
+                responseXML = xhr.responseXML;
             }
         };
 
         xhr.send();
 
-        waits(1);
+        waitsFor(function() {
+            return responseXML != null;
+        });
+
+        runs(function() {
+            var test = responseXML.getElementsByTagName('test');
+            expect(test.length).toBe(1);
+        });
+    });
+
+    it('should abort an AJAX request', function() {
+        var status, statusText, responseText;
+
+        xhr.open('get', 'base/test-data/test.json', true);
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                status = xhr.status;
+                statusText = xhr.statusText;
+                responseText = xhr.responseText;
+            }
+        };
+
+        xhr.send();
 
         runs(function() {
             xhr.abort();
@@ -57,14 +78,9 @@ describe('xhr proxy', function() {
         });
 
         runs(function() {
-            if (isIE()) {
-                expect(status).toBe(200);
-                expect(statusText).toBe('OK');
-            } else {
-                expect(status).toBe(0);
-                expect(statusText).toBe('');
-            }
-            expect(json).toBe('');
+            expect(status).toBe(0);
+            expect(statusText).toBe(isIE() ? 'Unknown' : '');
+            expect(responseText).toBe('');
         });
     });
 });

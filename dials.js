@@ -15,6 +15,7 @@
             thisObj.readyState = xhr.readyState;
             if (xhr.readyState == 4) {
                 thisObj.responseText = xhr.responseText;
+                thisObj.responseXML = xhr.responseXML;
                 thisObj.status = xhr.status;
                 thisObj.statusText = xhr.statusText;
             }
