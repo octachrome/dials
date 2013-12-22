@@ -6,7 +6,7 @@ describe('xhr proxy', function() {
     });
 
     it('should complete a normal AJAX request', function() {
-        var status, statusText, responseText, contentType, connection;
+        var status, statusText, responseText, contentType, connection, headers;
 
         xhr.open('get', 'base/test-data/test.json', true);
         xhr.setRequestHeader('Connection', 'close');
@@ -18,6 +18,7 @@ describe('xhr proxy', function() {
                 responseText = xhr.responseText;
                 contentType = xhr.getResponseHeader('Content-Type');
                 connection = xhr.getResponseHeader('Connection');
+                headers = xhr.getAllResponseHeaders();
             }
         };
 
@@ -33,6 +34,7 @@ describe('xhr proxy', function() {
             expect(/{"test":true}/.match(responseText)).toBeTruthy();
             expect(contentType).toBe('application/json');
             expect(connection).toBe('close');
+            expect(/Connection: close/m.match(headers)).toBeTruthy();
         });
     });
 

@@ -47,6 +47,10 @@
 
         getResponseHeader: function getResponseHeader(header) {
             return this._xhr.getResponseHeader(header);
+        },
+
+        getAllResponseHeaders: function getResponseHeader() {
+            return this._xhr.getAllResponseHeaders();
         }
     };
 
