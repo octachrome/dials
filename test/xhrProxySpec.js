@@ -6,9 +6,10 @@ describe('xhr proxy', function() {
     });
 
     it('should complete a normal AJAX request', function() {
-        var status, statusText, responseText, contentType, encoding;
+        var status, statusText, responseText, contentType, connection;
 
         xhr.open('get', 'base/test-data/test.json', true);
+        xhr.setRequestHeader('Connection', 'close');
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
@@ -16,6 +17,7 @@ describe('xhr proxy', function() {
                 statusText = xhr.statusText;
                 responseText = xhr.responseText;
                 contentType = xhr.getResponseHeader('Content-Type');
+                connection = xhr.getResponseHeader('Connection');
             }
         };
 
@@ -30,17 +32,19 @@ describe('xhr proxy', function() {
             expect(statusText).toBe('OK');
             expect(/{"test":true}/.match(responseText)).toBeTruthy();
             expect(contentType).toBe('application/json');
+            expect(connection).toBe('close');
         });
     });
 
     it('should populate responseXML', function() {
-        var responseXML;
+        var responseXML, connection;
 
         xhr.open('get', 'base/test-data/test.xml', true);
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 responseXML = xhr.responseXML;
+                connection = xhr.getResponseHeader('Connection');
             }
         };
 
@@ -53,6 +57,7 @@ describe('xhr proxy', function() {
         runs(function() {
             var test = responseXML.getElementsByTagName('test');
             expect(test.length).toBe(1);
+            expect(connection).toBe('keep-alive');
         });
     });
 
