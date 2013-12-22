@@ -43,6 +43,10 @@
 
         setRequestHeader: function setRequestHeader(header, value) {
             this._xhr.setRequestHeader(header, value);
+        },
+
+        getResponseHeader: function getResponseHeader(header) {
+            return this._xhr.getResponseHeader(header);
         }
     };
 
