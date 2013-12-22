@@ -8,7 +8,7 @@ describe('xhr proxy', function() {
     it('should complete a normal AJAX request', function() {
         var status, statusText, responseText, contentType, connection, headers;
 
-        xhr.open('get', 'base/test-data/test.json', true);
+        xhr.open('GET', 'base/test-data/test.json', true);
         xhr.setRequestHeader('Connection', 'close');
 
         xhr.onreadystatechange = function() {
@@ -41,7 +41,7 @@ describe('xhr proxy', function() {
     it('should populate responseXML', function() {
         var responseXML, connection;
 
-        xhr.open('get', 'base/test-data/test.xml', true);
+        xhr.open('GET', 'base/test-data/test.xml', true);
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
@@ -66,7 +66,7 @@ describe('xhr proxy', function() {
     it('should abort an AJAX request', function() {
         var status, statusText, responseText;
 
-        xhr.open('get', 'base/test-data/test.json', true);
+        xhr.open('GET', 'base/test-data/test.json', true);
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {

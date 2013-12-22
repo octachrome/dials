@@ -419,4 +419,79 @@ describe('Dials-Ajax', function() {
             }]);
         });
     });
+
+    it('should not record Ajax requests with no ready state handler', function() {
+        var xhr;
+
+        var f = Dials.tracked(function saveSomething() {
+            xhr = new XMLHttpRequest();
+
+            xhr.open('GET', 'base/test-data/test.json', true);
+            xhr.send();
+        });
+
+        var t0 = now();
+        f();
+
+        waitsFor(function() {
+            return xhr.readyState == 4;
+        });
+
+        runs(function() {
+            expect(operations).toFit([{
+                name: this.expect.toBeUnlessIE('saveSomething'),
+                t0: this.expect.toBeAtLeast(t0),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(0),
+                success: true
+            }]);
+        });
+    });
+
+    it('should record aborted Ajax requests', function() {
+        var done;
+
+        var f = Dials.tracked(function() {
+            xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    done = true;
+                }
+            };
+
+            xhr.open('GET', 'base/test-data/test.json', true);
+            xhr.send();
+
+            xhr.abort();
+        });
+
+        var t0 = now();
+        f();
+
+        waitsFor(function() {
+            return done;
+        });
+
+        runs(function() {
+            expect(operations).toFit([{
+                t0: this.expect.toBeAtLeast(t0),
+                name: this.expect.toBeUnlessIE('myOp'),
+                queued: this.expect.toBeAtLeast(0),
+                started: this.expect.toBeAtLeast(0),
+                duration: this.expect.toBeAtLeast(0),
+                totalDuration: this.expect.toBeAtLeast(0),
+                success: true,
+                calls: [{
+                    cause: 'ajax:base/test-data/test.json',
+                    queued: this.expect.toBeAtLeast(0),
+                    started: this.expect.toBeAtLeast(0),
+                    duration: this.expect.toBeAtLeast(0),
+                    success: true
+                }]
+            }]);
+        });
+    });
 });
