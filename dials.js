@@ -136,10 +136,10 @@
 
         checkDone(root);
 
-        if (error) {
-            throw error;
-        } else {
+        if (leg.success) {
             return result;
+        } else {
+            throw error;
         }
     }
 
