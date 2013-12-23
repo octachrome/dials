@@ -254,7 +254,7 @@ describe('Dials-Ajax', function() {
                 queued: this.expect.toBeAtLeast(0),
                 started: this.expect.toBeAtLeast(0),
                 duration: this.expect.toBeAtLeast(0),
-                totalDuration: this.expect.toBeAtLeast(5),
+                totalDuration: this.expect.toBeAtLeast(3),
                 success: true,
                 calls: [{
                     cause: 'timeout',   // a timeout set by prototype.js internally
@@ -266,7 +266,7 @@ describe('Dials-Ajax', function() {
                 {
                     cause: 'ajax:base/missing.json',
                     queued: this.expect.toBeAtLeast(0),
-                    started: this.expect.toBeAtLeast(5),   // takes anywhere between 5ms and 300ms to complete the request
+                    started: this.expect.toBeAtLeast(3),   // takes anywhere between 3ms and 300ms to complete the request
                     duration: this.expect.toBeAtLeast(0),
                     success: true
                 }]
