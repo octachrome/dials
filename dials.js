@@ -255,13 +255,13 @@
      */
     var timeoutLegs = {};
 
-    var plainTimeout = env.setTimeout;
+    var plainSetTimeout = env.setTimeout;
     env.setTimeout = function Dials_setTimeout() {
         var args = Array.prototype.slice.call(arguments, 0);
         // 1st argument is the callback function
         args[0] = wrap(args[0], 'timeout');
         var legId = args[0].legId;
-        var timeoutId = plainTimeout.apply(null, args);
+        var timeoutId = plainSetTimeout.apply(null, args);
         timeoutLegs[timeoutId] = legId;
         return timeoutId;
     };
@@ -271,9 +271,9 @@
         var legId = timeoutLegs[timeoutId];
         if (legId != null) {
             abortLeg(legId);
-            plainClearTimeout(timeoutId);
             delete timeoutLegs[timeoutId];
         }
+        plainClearTimeout(timeoutId);
     };
 
     if (typeof XMLHttpRequest != 'undefined') {

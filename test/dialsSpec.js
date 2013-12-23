@@ -476,4 +476,20 @@ describe('Dials', function() {
             calls: []
         }]);
     });
+
+    it('should be able to cancel untracked timeouts', function() {
+        var timedOut = false;
+
+        var timeoutId = setTimeout(function timeout() {
+            timedOut = true;
+        }, 1);
+
+        clearTimeout(timeoutId);
+
+        waits(50);
+
+        runs(function() {
+            expect(timedOut).toBeFalsy();
+        });
+    });
 });
