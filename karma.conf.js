@@ -93,9 +93,11 @@ module.exports = function(config) {
         'Chrome',
         // 'Firefox',
         // 'wd_ie7_win',
+        // 'sl_ie7_win',
+        // 'wd_ie8_win',
         // 'sl_ie8_win',
         // 'sl_ie9_win',
-        // 'sl_ie10_win'
+        // 'sl_ie10_win',
         // 'sl_ie11_win',
         // 'sl_safari_osx',
     ],
@@ -114,7 +116,7 @@ module.exports = function(config) {
     sauceLabs: {
       username: 'cdbrown',
       accessKey: 'e07338f0-16e9-4131-a4b1-59f5c0b0eb60',
-      startConnect: true,
+      startConnect: false,
       testName: 'Dials'
     },
 
@@ -162,6 +164,13 @@ module.exports = function(config) {
         browserName: 'internet explorer',
         version: '7',
         name: 'IE7 WebDriver'
+      },
+      wd_ie8_win: {
+        base: 'WebDriver',
+        config: webdriverConfig,
+        browserName: 'internet explorer',
+        version: '8',
+        name: 'IE8 WebDriver'
       }
     }
   });
