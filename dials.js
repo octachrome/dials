@@ -295,6 +295,7 @@
         var plainOpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function Dials_XMLHttpRequest_open() {
             this.Dials_url = arguments[1];
+            this.Dials_synchronous = (arguments[2] === false);
             plainOpen.apply(this, arguments);
         };
 
@@ -305,9 +306,9 @@
             var url = this.Dials_url;
             var cause = 'ajax:' + url;
 
-            if (thisObj.onreadystatechange) {
-                var plain = thisObj.onreadystatechange;
-                var wrapped = wrap(thisObj.onreadystatechange, cause);
+            if (thisObj.onreadystatechange || this.Dials_synchronous) {
+                var plain = thisObj.onreadystatechange || function() {};
+                var wrapped = wrap(plain, cause);
                 thisObj.onreadystatechange = function() {
                     if (thisObj.readyState == 4) {
                         return wrapped();

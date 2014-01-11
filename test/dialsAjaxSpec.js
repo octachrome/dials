@@ -15,6 +15,10 @@ describe('Dials-Ajax', function() {
                 return this.actual >= expected;
             },
 
+            toBeAtMost: function(expected) {
+                return this.actual <= expected;
+            },
+
             /**
              * An equality test which is ignored for IE browsers (IE does not support the Function.name property),
              */
@@ -493,5 +497,37 @@ describe('Dials-Ajax', function() {
                 }]
             }]);
         });
+    });
+
+    it('should record synchronous Ajax requests', function() {
+        var f = Dials.tracked(function myOp() {
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('GET', 'base/test-data/test.json', false);
+            xhr.send();
+            return xhr.responseText;
+        });
+
+        var t0 = now();
+        var responseText = f();
+
+        expect(responseText).toBe('{"test":true}\n');
+
+        expect(operations).toFit([{
+            t0: this.expect.toBeAtLeast(t0),
+            name: this.expect.toBeUnlessIE('myOp'),
+            queued: this.expect.toBeAtMost(2),
+            started: this.expect.toBeAtMost(2),
+            duration: this.expect.toBeAtLeast(10),
+            totalDuration: this.expect.toBeAtLeast(10),
+            success: true,
+            calls: [{
+                cause: 'ajax:base/test-data/test.json',
+                queued: this.expect.toBeAtMost(2),
+                started: this.expect.toBeAtLeast(10),
+                duration: this.expect.toBeAtMost(2),
+                success: true
+            }]
+        }]);
     });
 });
