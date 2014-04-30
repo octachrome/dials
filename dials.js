@@ -285,7 +285,7 @@
         // 1st argument is the callback function
         args[0] = wrap(args[0], 'timeout');
         var legId = args[0].legId;
-        var timeoutId = plainSetTimeout.apply(null, args);
+        var timeoutId = plainSetTimeout.apply(env, args);
         timeoutLegs[timeoutId] = legId;
         return timeoutId;
     };
